@@ -1,3 +1,5 @@
+package src.java.utils;
+
 import java.awt.Color;
 
 import javax.swing.ImageIcon;

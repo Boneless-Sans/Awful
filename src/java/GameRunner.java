@@ -1,3 +1,5 @@
+package src.java;
+
 import java.awt.Font;
 import java.awt.Color;
 
@@ -7,7 +9,7 @@ import javax.swing.border.Border;
 public class GameRunner {
     public static void main(String[] args){
 
-        ImageIcon image = new ImageIcon("main.png");
+        ImageIcon image = new ImageIcon("src/resource/assets/main.png");
         Border border = BorderFactory.createLineBorder(Color.GREEN,3);
         JLabel label = new JLabel();
 
