@@ -25,7 +25,7 @@ public class Panels {
 
         JLabel label = new JLabel();
         label.setText("Hello, World!");
-        label.setForeground(Color.BLACK);
+        label.setForeground(Color.YELLOW);
         label.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
         label.setIcon(icon.getImage());
 
