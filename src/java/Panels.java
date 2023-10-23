@@ -1,5 +1,6 @@
 package src.java;
 
+import src.java.utils.AudioPlayer;
 import src.java.utils.IconResize;
 
 import javax.swing.*;
@@ -7,8 +8,10 @@ import java.awt.*;
 
 public class Panels {
     public static void main(String[] args){
-        IconResize icon = new IconResize("src/resource/assets/icon.png", 100,100);
-        icon.set();
+        IconResize icon = new IconResize();
+        icon.set("src/resource/assets/pic.png", 50,50);
+
+        //AudioPlayer clip = new AudioPlayer();
 
         JPanel bluePanel = new JPanel();
         JPanel redPanel = new JPanel();
@@ -16,20 +19,24 @@ public class Panels {
 
         bluePanel.setBackground(Color.BLUE);
         bluePanel.setBounds(0,0,250,250);
+        bluePanel.setLayout(null);
 
         redPanel.setBackground(Color.RED);
         redPanel.setBounds(250,0,250,250);
+        redPanel.setLayout(null);
 
         greenPanel.setBackground(Color.GREEN);
         greenPanel.setBounds(0,250,500,250);
+        greenPanel.setLayout(null);
 
         JLabel label = new JLabel();
         label.setText("Hello, World!");
         label.setForeground(Color.YELLOW);
         label.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
         label.setIcon(icon.getImage());
-
-        //label.setHorizontalTextPosition(JLabel.BOTTOM); //should set center of the panel, instead it centers the text over the image??
+//        label.setVerticalAlignment(JLabel.BOTTOM); //only needed with a border
+//        label.setHorizontalAlignment(JLabel.RIGHT);
+        label.setBounds(10,10,250,250);
 
         JFrame frame = new JFrame();
 
@@ -37,11 +44,10 @@ public class Panels {
         frame.setLayout(null);
         frame.setSize(750,750);
         frame.setVisible(true);
+
         greenPanel.add(label);
         frame.add(redPanel);
         frame.add(bluePanel);
         frame.add(greenPanel);
-
-        //frame.pack();
     }
 }
