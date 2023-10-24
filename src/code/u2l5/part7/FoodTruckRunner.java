@@ -2,7 +2,6 @@ package src.code.u2l5.part7;
 
 import src.code.util.ConstructorsHelper;
 import src.java.utils.IconResize;
-import src.java.utils.WindowFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +27,10 @@ public class FoodTruckRunner {
         System.out.println("$" + pumpkinPie.getPrice() + "\n");
 
 
-        WindowFactory frame = new WindowFactory(null, "name",250, 250);
+        JFrame frame = new JFrame();
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(250,250);
 
         JButton cycle = new JButton();
         cycle.setLayout(null);
@@ -44,8 +46,7 @@ public class FoodTruckRunner {
         downScale.setBounds(135,125,50,25);
 
 
-        IconResize icon = new IconResize();
-        icon.set("src/resource/assets/pic.png", 50,50);
+        IconResize icon = new IconResize("src/resource/assets/pic.png", 50,50);
 
         upScale.addActionListener(e -> {
             fontSize++;

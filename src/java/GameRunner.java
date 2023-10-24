@@ -1,14 +1,9 @@
 package src.java;
 
-import src.java.utils.WindowFactory;
-
-import java.awt.*;
-
-import javax.swing.*;
-import javax.swing.border.Border;
+import src.java.utils.Windows;
 
 public class GameRunner {
     public static void main(String[] args){
-        new Drunk();
+        Windows frame = new Windows(250,250, "title", "src/resource/assets/icon.png");
     }
 }
