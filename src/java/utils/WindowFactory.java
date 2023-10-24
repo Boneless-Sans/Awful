@@ -16,21 +16,21 @@ public class WindowFactory extends JFrame{
         height = 250;
     }
 
-    public WindowFactory(String aIcon, String aName, int aWidth, int aHeight){
-        name = aName;
-        width = aWidth;
-        height = aHeight;
-        iconImage = aIcon;
-        resizeable = false;
+    public WindowFactory(String icon, String name, int width, int height){
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.iconImage = icon;
+        this.resizeable = false;
     }
 
-    public WindowFactory(String aIcon, String aName, int aWidth, int aHeight, String aCloseOperation, boolean aResizeable){
-        name = aName;
-        width = aWidth;
-        height = aHeight;
-        iconImage = aIcon;
-        resizeable = aResizeable;
-        switch(aCloseOperation){
+    public WindowFactory(String icon, String name, int width, int height, String closeOperation, boolean resizeable){
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.iconImage = icon;
+        this.resizeable = resizeable;
+        switch(closeOperation){
             case "nothing":
                 CloseOperation = JFrame.DO_NOTHING_ON_CLOSE;
             case "exit":
