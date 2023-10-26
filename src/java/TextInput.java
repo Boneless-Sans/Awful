@@ -1,15 +1,19 @@
 package src.java;
 
+import src.java.utils.FileReaderSaver;
 import src.java.utils.Windows;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileReader;
 
 public class TextInput extends JFrame implements ActionListener{
     JButton button;
     JTextField textField;
+    JLabel file;
     TextInput(){
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new FlowLayout());
@@ -28,10 +32,12 @@ public class TextInput extends JFrame implements ActionListener{
         //textField.setCaretColor(Color.BLUE);
         textField.setText("Username");
         textField.setEditable(true);
+        file = new JLabel("Please insert text and press submit");
 
         this.getContentPane().setBackground(Color.gray);
         this.add(button);
         this.add(textField);
+        this.add(file);
         this.pack();
         this.setVisible(true);
     }
@@ -40,6 +46,8 @@ public class TextInput extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==button){
             System.out.println("Fuck off " + textField.getText());
+            FileReaderSaver.save(textField.getText(), "src/resource/data/text_field");
+            file.setText(textField.getText());
         }
     }
     public static void main(String[] args){

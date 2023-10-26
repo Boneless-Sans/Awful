@@ -3,10 +3,10 @@ package src.java;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +19,13 @@ public class Python {
 
     public static void create() {
         JFrame frame = new JFrame("Encryption/Decryption");
-        frame.setSize(200, 150);
+        frame.setSize(400, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new FlowLayout());
 
-        JButton encryptButton = new JButton("Encrypt");
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(2, 2, 10, 10));
+
+        JButton encryptButton = new JButton("Encrypt Text");
         encryptButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -31,7 +33,7 @@ public class Python {
             }
         });
 
-        JButton decryptButton = new JButton("Decrypt");
+        JButton decryptButton = new JButton("Decrypt Image");
         decryptButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -39,8 +41,9 @@ public class Python {
             }
         });
 
-        frame.add(encryptButton);
-        frame.add(decryptButton);
+        panel.add(encryptButton);
+        panel.add(decryptButton);
+        frame.add(panel);
 
         frame.setVisible(true);
     }
@@ -51,10 +54,17 @@ public class Python {
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File textFile = fileChooser.getSelectedFile();
-            String saveLocation = "output.png";  // You can customize the save location.
-            String password = JOptionPane.showInputDialog("Enter the encryption password:");
-            String numbers = encryptTextToNumbers(textFile, password);
-            convertNumbersToImage(numbers, saveLocation);
+
+            JFileChooser saveFileChooser = new JFileChooser();
+            saveFileChooser.setFileFilter(new FileNameExtensionFilter("PNG Files", "png"));
+            int saveReturnValue = saveFileChooser.showSaveDialog(null);
+
+            if (saveReturnValue == JFileChooser.APPROVE_OPTION) {
+                File saveLocation = saveFileChooser.getSelectedFile();
+                String password = JOptionPane.showInputDialog("Enter the encryption password:");
+                String numbers = encryptTextToNumbers(textFile, password);
+                convertNumbersToImage(numbers, saveLocation.getAbsolutePath());
+            }
         }
     }
 
@@ -64,11 +74,18 @@ public class Python {
         int returnValue = fileChooser.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             File imageFile = fileChooser.getSelectedFile();
-            String saveLocation = "output.txt";  // You can customize the save location.
-            String password = JOptionPane.showInputDialog("Enter the decryption password:");
-            String data = decryptImageToRGB(imageFile, password);
-            String text = decryptText(data);
-            writeTextFile(text, saveLocation);
+
+            JFileChooser saveFileChooser = new JFileChooser();
+            saveFileChooser.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
+            int saveReturnValue = saveFileChooser.showSaveDialog(null);
+
+            if (saveReturnValue == JFileChooser.APPROVE_OPTION) {
+                File saveLocation = saveFileChooser.getSelectedFile();
+                String password = JOptionPane.showInputDialog("Enter the decryption password:");
+                String data = decryptImageToRGB(imageFile, password);
+                String text = decryptText(data);
+                writeTextFile(text, saveLocation.getAbsolutePath());
+            }
         }
     }
 
@@ -78,6 +95,9 @@ public class Python {
             StringBuilder text = new StringBuilder();
             while (scanner.hasNextLine()) {
                 text.append(scanner.nextLine());
+                if (scanner.hasNextLine()) {
+                    text.append("\n"); // Preserve line breaks
+                }
             }
 
             String encryptedText = encryptText(text.toString(), password);
@@ -114,8 +134,15 @@ public class Python {
             }
 
             String data = String.join(" ", rgbValues);
-            password = password;
-            data = decryptWithSeed(data, password.getBytes());
+            byte[] passwordBytes = password.getBytes();
+
+            // Calculate the length of the original data
+            int originalDataLength = data.length() / 3;
+
+            // Extract the data portion without padding
+            data = data.substring(0, originalDataLength * 3);
+
+            data = decryptWithSeed(data, passwordBytes);
 
             return data;
         } catch (IOException e) {
@@ -123,6 +150,7 @@ public class Python {
             return null;
         }
     }
+
 
     public static String encryptText(String text, String password) {
         StringBuilder encryptedText = new StringBuilder();
@@ -139,18 +167,25 @@ public class Python {
     public static String decryptText(String text) {
         String[] items = text.split(" ");
         List<String> decryptedText = new ArrayList<>();
+        StringBuilder currentLine = new StringBuilder();
 
         for (String item : items) {
             try {
                 int itemValue = Integer.parseInt(item);
                 char charValue = (char) itemValue;
-                decryptedText.add(Character.toString(charValue));
+                currentLine.append(charValue);
             } catch (NumberFormatException e) {
-                decryptedText.add("");
+                if (!currentLine.toString().isEmpty()) {
+                    decryptedText.add(currentLine.toString());
+                }
+                currentLine = new StringBuilder();
             }
         }
+        if (!currentLine.toString().isEmpty()) {
+            decryptedText.add(currentLine.toString());
+        }
 
-        return String.join("", decryptedText);
+        return String.join("\n", decryptedText);
     }
 
     public static void convertNumbersToImage(String numbers, String saveLocation) {
@@ -196,7 +231,7 @@ public class Python {
     }
 
     public static void writeTextFile(String text, String saveLocation) {
-        try (FileWriter writer = new FileWriter(saveLocation)) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveLocation))) {
             writer.write(text);
             System.out.println("Text saved.");
         } catch (IOException e) {

@@ -48,14 +48,17 @@ public class FoodTruckRunner {
 
         IconResize icon = new IconResize("src/resource/assets/pic.png", 50,50);
 
+        JLabel labelFlavor = new JLabel("Flavor: " + pumpkinPie.getFlavor());
         upScale.addActionListener(e -> {
             fontSize++;
+            labelFlavor.setFont(new Font("Comic Sans MS", Font.BOLD, fontSize));
         });
         downScale.addActionListener(e -> {
             fontSize--;
+            labelFlavor.setFont(new Font("Comic Sans MS", Font.BOLD, fontSize));
         });
-        JLabel labelFlavor = new JLabel("Flavor: " + pumpkinPie.getFlavor());
-        labelFlavor.setFont(new Font("Comic Sans MS", Font.BOLD, fontSize));
+        //JLabel labelFlavor = new JLabel("Flavor: " + pumpkinPie.getFlavor());
+
         labelFlavor.setBounds(0,0,255,255);
 
         labelFlavor.setIcon(icon.getImage());
