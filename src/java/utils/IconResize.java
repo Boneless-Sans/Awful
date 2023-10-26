@@ -30,6 +30,8 @@ public class IconResize {
     }
     public IconResize(String icon) {
         //must run before being called!!
+        width = 50;
+        height = 50;
         ImageIcon originalIcon = new ImageIcon(icon);
         Image image = originalIcon.getImage();
         Image newImg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);

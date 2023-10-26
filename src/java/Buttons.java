@@ -40,4 +40,7 @@ public class Buttons extends JFrame{
         this.setVisible(true);
         this.add(button);
     }
+    public static void main(String[] args){
+        new Buttons();
+    }
 }
