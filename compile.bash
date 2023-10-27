@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Set the source directory where your Java files are located
-sourceDir="/Users/apcomputerscience/Desktop/Awful/src/java/"
+sourceDir="./src/java/"
 
 # Set the output directory where you want to store the main JAR file
-outputDir="/Users/apcomputerscience/Desktop/output/"
+outputDir="./../../Desktop/output/"
 
 # Create a temporary directory for compiling and packaging
 tempDir=$(mktemp -d)

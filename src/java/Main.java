@@ -55,7 +55,9 @@ public class Main {
                 appClass.getMethod("main", String[].class).invoke(null, (Object) new String[]{});
             } catch (Exception e) {
                 e.printStackTrace();
-                showBuildFailedWindow("Failed to run the selected application.");
+                StringWriter stackTraceWriter = new StringWriter();
+                e.printStackTrace(new PrintWriter(stackTraceWriter));
+                showBuildFailedWindow("Failed to run the selected application.\n" + e.getMessage(), stackTraceWriter.toString());
             }
         });
     }
@@ -85,12 +87,10 @@ public class Main {
         return appList;
     }
 
-    private static void showBuildFailedWindow(String errorMessage, Throwable exception) {
+    private static void showBuildFailedWindow(String errorMessage, String stackTrace) {
         SwingUtilities.invokeLater(() -> {
             JFrame errorFrame = new JFrame("Build Failed");
             errorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            errorFrame.setSize(600, 200);
-            errorFrame.setResizable(false);
 
             JPanel contentPanel = new JPanel(new BorderLayout()); // Create a panel for the entire content
 
@@ -103,25 +103,34 @@ public class Main {
             buildFailedLabel.setFont(buildFailedLabel.getFont().deriveFont(Font.PLAIN, 18f));
 
             JTextArea errorTextArea = new JTextArea(errorMessage);
-            errorTextArea.setEditable(false);
             errorTextArea.setWrapStyleWord(true);
             errorTextArea.setLineWrap(true);
             errorTextArea.setForeground(Color.BLACK); // Set text color to black
             errorTextArea.setFont(errorTextArea.getFont().deriveFont(Font.PLAIN, 14f));
+            errorTextArea.setEditable(false);
 
-            // Display the stack trace in the error window
-            StringWriter stackTraceWriter = new StringWriter();
-            exception.printStackTrace(new PrintWriter(stackTraceWriter));
-            JTextArea stackTraceTextArea = new JTextArea(stackTraceWriter.toString());
-            stackTraceTextArea.setEditable(false);
+            JTextArea stackTraceTextArea = new JTextArea(stackTrace);
+            stackTraceTextArea.setWrapStyleWord(true);
+            stackTraceTextArea.setLineWrap(true);
             stackTraceTextArea.setForeground(Color.RED); // Set text color to red
             stackTraceTextArea.setFont(stackTraceTextArea.getFont().deriveFont(Font.PLAIN, 12f));
+            stackTraceTextArea.setEditable(false);
+
+            JScrollPane errorScrollPane = new JScrollPane(errorTextArea);
+            JScrollPane stackTraceScrollPane = new JScrollPane(stackTraceTextArea);
 
             contentPanel.add(buildFailedLabel, BorderLayout.NORTH);
-            contentPanel.add(errorTextArea, BorderLayout.CENTER);
-            contentPanel.add(new JScrollPane(stackTraceTextArea), BorderLayout.SOUTH);
+            contentPanel.add(errorScrollPane, BorderLayout.CENTER);
+            contentPanel.add(stackTraceScrollPane, BorderLayout.SOUTH);
 
             errorFrame.add(contentPanel);
+
+            // Calculate the preferred size based on the content
+            Dimension preferredSize = new Dimension(600, 400);
+            errorTextArea.setPreferredSize(preferredSize);
+            stackTraceTextArea.setPreferredSize(preferredSize);
+
+            errorFrame.pack(); // Resize the frame based on the preferred size
 
             // Flashing white and red background
             Timer timer = new Timer(500, new ActionListener() {
