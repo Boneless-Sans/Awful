@@ -1,5 +1,8 @@
 package src.java;
 
+import src.java.utils.AssetLoader;
+import src.java.utils.IconResize;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,19 +10,24 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.function.BiConsumer;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
 
 public class Main {
     private static JFrame frame;  // Declare the selector window as a class variable
+    private static boolean assetsDetected = true;  // Flag to check if assets are detected
+    private static JLabel assetsDirLabel; // Label to display the assets directory
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             frame = new JFrame("Application Launcher");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // Allow the selector window to be closed
-            frame.setSize(300, 150);
+            frame.setSize(300, 200); // Increased height to accommodate the label
             frame.setLayout(new FlowLayout());
+
+            InputStream assetStream = AssetLoader.loadAsset("src/resource/assets/check_mark.png");
 
             // Create a list of application names by inspecting the JAR file
             ArrayList<String> applications = getAvailableApplications();
@@ -39,13 +47,91 @@ public class Main {
                 }
             });
 
+            // Check if assets are not detected and display the message
+            if (!assetsDetected) {
+                displayAssetsNotDetectedMessage();
+            }
+            IconResize icon = new IconResize("src/resource/assets/check_mark.png");
+            JLabel label = new JLabel(icon.getImage());
+
             frame.add(new JLabel("Select an application to launch:"));
             frame.add(appList);
             frame.add(launchButton);
+            frame.setResizable(false);
             frame.setVisible(true);
+            frame.add(label);
         });
     }
 
+    private static void displayAssetsNotDetectedMessage() {
+        JLabel notDetectedLabel = new JLabel("Assets Not Detected");
+        notDetectedLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        notDetectedLabel.setFont(notDetectedLabel.getFont().deriveFont(Font.PLAIN, 18f));
+        notDetectedLabel.setOpaque(true);
+
+        // Check for assets and update the label accordingly
+        checkForAssets();
+
+        JLabel assetsDirInfoLabel = new JLabel("Assets directory: " + (assetsDetected ? "./src/resource/assets" : "Not found"));
+        assetsDirInfoLabel.setFont(assetsDirInfoLabel.getFont().deriveFont(Font.PLAIN, 12f));
+        assetsDirInfoLabel.setForeground(Color.BLACK); // Set text color to black
+
+        Timer timer = new Timer(500, new ActionListener() {
+            private boolean isRed = true;
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isRed) {
+                    notDetectedLabel.setForeground(Color.RED);
+                    notDetectedLabel.setBackground(Color.WHITE);
+                } else {
+                    notDetectedLabel.setForeground(Color.WHITE);
+                    notDetectedLabel.setBackground(Color.RED);
+                }
+                isRed = !isRed;
+            }
+        });
+
+        timer.start();
+
+        frame.add(notDetectedLabel, 0); // Add the message at the top
+        frame.add(assetsDirInfoLabel); // Add the assets directory info
+        frame.revalidate();
+    }
+
+    private static ArrayList<String> getAvailableApplications() {
+        ArrayList<String> appList = new ArrayList<>();
+        try {
+            // Get the package name based on the Main class's package
+            String packageName = Main.class.getPackage().getName();
+            JarFile jarFile = new JarFile(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            Enumeration<JarEntry> entries = jarFile.entries();
+
+            // Check if assets are not detected and set the flag
+            checkForAssets();
+
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                String entryName = entry.getName();
+                if (entryName.endsWith(".class") && entryName.startsWith(packageName.replace(".", "/")) && !entryName.equals(Main.class.getName().replace(".", "/") + ".class")) {
+                    String className = entryName.substring(0, entryName.length() - 6).replace("/", ".");
+                    appList.add(className);
+                }
+            }
+
+            jarFile.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return appList;
+    }
+
+    private static void checkForAssets() {
+        // Check if the assets directory exists
+        File assetsDir = new File("./src/resource/assets");
+        assetsDetected = assetsDir.exists() && assetsDir.isDirectory();
+    }
     private static void launchApplication(String appName) {
         // Launch the selected application in a separate thread
         SwingUtilities.invokeLater(() -> {
@@ -60,31 +146,6 @@ public class Main {
                 showBuildFailedWindow("Failed to run the selected application.\n" + e.getMessage(), stackTraceWriter.toString());
             }
         });
-    }
-
-    private static ArrayList<String> getAvailableApplications() {
-        ArrayList<String> appList = new ArrayList<>();
-        try {
-            // Get the package name based on the Main class's package
-            String packageName = Main.class.getPackage().getName();
-            JarFile jarFile = new JarFile(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-            Enumeration<JarEntry> entries = jarFile.entries();
-
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                String entryName = entry.getName();
-                if (entryName.endsWith(".class") && entryName.startsWith(packageName.replace(".", "/")) && !entryName.equals(Main.class.getName().replace(".", "/") + ".class")) {
-                    String className = entryName.substring(0, entryName.length() - 6).replace("/", ".");
-                    appList.add(className);
-                }
-            }
-
-            jarFile.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return appList;
     }
 
     private static void showBuildFailedWindow(String errorMessage, String stackTrace) {

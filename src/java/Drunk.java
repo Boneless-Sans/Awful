@@ -31,4 +31,7 @@ public class Drunk extends JFrame {
         this.add(button);
         this.setIconImage(icon.getImage().getImage());
     }
+    public static void main(String[] args){
+        new Drunk();
+    }
 }

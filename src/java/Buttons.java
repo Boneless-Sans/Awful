@@ -20,7 +20,7 @@ public class Buttons extends JFrame{
         label = new JLabel();
         button = new JButton();
         button.setBounds(100, 100, 250, 100);
-        button.setText("Niggers");
+        button.setText("Press me!!");
         button.setFocusable(false);
         button.setIcon(icon.getImage());
         button.setHorizontalTextPosition(JButton.CENTER);
