@@ -1,8 +1,6 @@
 package src.java;
 
 import src.java.utils.AssetLoader;
-//import src.java.utils.IconResize;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,7 +16,6 @@ public class Main {
     private static JFrame frame;  // Declare the selector window as a class variable
     private static boolean assetsDetected = true;  // Flag to check if assets are detected
     private static JLabel assetsDirLabel; // Label to display the assets directory
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -51,18 +48,16 @@ public class Main {
             if (!assetsDetected) {
                 displayAssetsNotDetectedMessage();
             }
-            //IconResize icon = new IconResize("src/resource/assets/check_mark.png");
-            //JLabel label = new JLabel(icon.getImage());
 
             frame.add(new JLabel("Select an application to launch:"));
             frame.add(appList);
             frame.add(launchButton);
             frame.setResizable(false);
             frame.setVisible(true);
-            //frame.add(label);
         });
     }
 
+    // Displays a message when assets are not detected
     private static void displayAssetsNotDetectedMessage() {
         JLabel notDetectedLabel = new JLabel("Assets Not Detected");
         notDetectedLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -99,6 +94,7 @@ public class Main {
         frame.revalidate();
     }
 
+    // Retrieves a list of available applications from the JAR file
     private static ArrayList<String> getAvailableApplications() {
         ArrayList<String> appList = new ArrayList<>();
         try {
@@ -127,16 +123,16 @@ public class Main {
         return appList;
     }
 
+    // Checks if the assets directory exists
     private static void checkForAssets() {
-        // Check if the assets directory exists
         File assetsDir = new File("./src/resource/assets");
         assetsDetected = assetsDir.exists() && assetsDir.isDirectory();
     }
+
+    // Launches the selected application in a separate thread
     private static void launchApplication(String appName) {
-        // Launch the selected application in a separate thread
         SwingUtilities.invokeLater(() -> {
             try {
-                // Load the selected class and execute its main method in a new thread
                 Class<?> appClass = Class.forName(appName);
                 appClass.getMethod("main", String[].class).invoke(null, (Object) new String[]{});
             } catch (Exception e) {
@@ -148,32 +144,31 @@ public class Main {
         });
     }
 
+    // Displays a window with build failure information
     private static void showBuildFailedWindow(String errorMessage, String stackTrace) {
         SwingUtilities.invokeLater(() -> {
             JFrame errorFrame = new JFrame("Build Failed");
             errorFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
             JPanel contentPanel = new JPanel(new BorderLayout()); // Create a panel for the entire content
-
-            // Set the background color for the content panel to red
-            contentPanel.setBackground(Color.RED);
+            contentPanel.setBackground(Color.RED); // Set the background color to red
 
             JLabel buildFailedLabel = new JLabel("BUILD FAILED");
             buildFailedLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            buildFailedLabel.setForeground(Color.RED); // Initial text color red
+            buildFailedLabel.setForeground(Color.RED);
             buildFailedLabel.setFont(buildFailedLabel.getFont().deriveFont(Font.PLAIN, 18f));
 
             JTextArea errorTextArea = new JTextArea(errorMessage);
             errorTextArea.setWrapStyleWord(true);
             errorTextArea.setLineWrap(true);
-            errorTextArea.setForeground(Color.BLACK); // Set text color to black
+            errorTextArea.setForeground(Color.BLACK);
             errorTextArea.setFont(errorTextArea.getFont().deriveFont(Font.PLAIN, 14f));
             errorTextArea.setEditable(false);
 
             JTextArea stackTraceTextArea = new JTextArea(stackTrace);
             stackTraceTextArea.setWrapStyleWord(true);
             stackTraceTextArea.setLineWrap(true);
-            stackTraceTextArea.setForeground(Color.RED); // Set text color to red
+            stackTraceTextArea.setForeground(Color.RED);
             stackTraceTextArea.setFont(stackTraceTextArea.getFont().deriveFont(Font.PLAIN, 12f));
             stackTraceTextArea.setEditable(false);
 
@@ -186,14 +181,12 @@ public class Main {
 
             errorFrame.add(contentPanel);
 
-            // Calculate the preferred size based on the content
             Dimension preferredSize = new Dimension(600, 400);
             errorTextArea.setPreferredSize(preferredSize);
             stackTraceTextArea.setPreferredSize(preferredSize);
 
-            errorFrame.pack(); // Resize the frame based on the preferred size
+            errorFrame.pack();
 
-            // Flashing white and red background
             Timer timer = new Timer(500, new ActionListener() {
                 private boolean isRed = true;
 

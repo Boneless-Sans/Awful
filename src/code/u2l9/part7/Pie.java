@@ -1,20 +1,44 @@
 package src.code.u2l9.part7;
 
-public class Pie extends Dessert{
-    private int size;
+public class Pie {
+    private String flavor;
+    private String answer;
+    private double price;
+    private int Diameter;
+
     public Pie(){
-        super("Apple", 12.99);
-        int size = 12;
+
     }
-    public Pie(String flavor, double price, int size){
-        super(flavor, price);
-        this.size = size;
+    public Pie(String flavor, double price){
+        this.flavor = flavor;
+        this.price = price;
     }
-    public void setSize(int size){
-        this.size = size;
+    public Pie(String flavor, double price, int Diameter){
+        this.flavor = flavor;
+        this.price = price;
+        this.Diameter = Diameter;
     }
 
-    public int getSize(){
-        return size;
+    public void setFlavor(String flavor){
+        this.flavor = flavor;
     }
+    public void setPrice(double price){
+        this.price = price;
+    }
+
+    public void setDiameter(int Diameter){
+        this.Diameter = Diameter;
+    }
+
+    public void setAnswer(String answer){
+        this.answer = answer;
+    }
+
+    public String getFlavor(){return flavor;}
+
+    public double getPrice(){return price;}
+
+    public int getDiameter(){return Diameter;}
+
+    public String getAnswer(){return answer;}
 }
