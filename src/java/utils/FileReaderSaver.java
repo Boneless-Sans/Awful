@@ -1,5 +1,6 @@
 package src.java.utils;
 
+import java.io.File;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -8,15 +9,26 @@ import java.io.FileNotFoundException;
 
 public class FileReaderSaver {
     public static void save(String data, String fileName) {
-        try (FileWriter writer = new FileWriter(fileName)) {
+        if (fileName.indexOf('/') == -1) {
+            // No directory provided, use the default directory
+            fileName = "src/resource/data/" + fileName;
+        }
+
+        File file = new File(fileName);
+        try (FileWriter writer = new FileWriter(file)) {
             writer.write(data);
-            System.out.println("Data saved to " + fileName);
+            System.out.println("Data saved to " + file.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static String read(String fileName) {
+        if (fileName.indexOf('/') == -1) {
+            // No directory provided, use the default directory
+            fileName = "src/resource/data/" + fileName;
+        }
+
         try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
             StringBuilder content = new StringBuilder();
             String line;

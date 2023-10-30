@@ -5,7 +5,6 @@ import src.java.utils.IconResize;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class Buttons extends JFrame{
 

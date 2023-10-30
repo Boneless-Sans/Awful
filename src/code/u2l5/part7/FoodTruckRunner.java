@@ -1,7 +1,7 @@
 package src.code.u2l5.part7;
 
 import src.code.util.ConstructorsHelper;
-import src.java.utils.IconResize;
+//import src.java.utils.IconResize;
 
 import javax.swing.*;
 import java.awt.*;
@@ -46,7 +46,7 @@ public class FoodTruckRunner {
         downScale.setBounds(135,125,50,25);
 
 
-        IconResize icon = new IconResize("src/resource/assets/pic.png", 50,50);
+        //IconResize icon = new IconResize("src/resource/assets/pic.png", 50,50);
 
         JLabel labelFlavor = new JLabel("Flavor: " + pumpkinPie.getFlavor());
         upScale.addActionListener(e -> {
@@ -61,11 +61,11 @@ public class FoodTruckRunner {
 
         labelFlavor.setBounds(0,0,255,255);
 
-        labelFlavor.setIcon(icon.getImage());
+        //labelFlavor.setIcon(icon.getImage());
         cycle.addActionListener(e -> {
             if(cycleCount < iconPaths.length){
-                icon.set(iconPaths[cycleCount], 75,75);
-                labelFlavor.setIcon(icon.getImage());
+                //icon.set(iconPaths[cycleCount], 75,75);
+                //labelFlavor.setIcon(icon.getImage());
                 if(cycleCount == 2){
                     cycleCount = 0;
                 }else{

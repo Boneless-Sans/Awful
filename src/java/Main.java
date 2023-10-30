@@ -1,7 +1,7 @@
 package src.java;
 
 import src.java.utils.AssetLoader;
-import src.java.utils.IconResize;
+//import src.java.utils.IconResize;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,15 +51,15 @@ public class Main {
             if (!assetsDetected) {
                 displayAssetsNotDetectedMessage();
             }
-            IconResize icon = new IconResize("src/resource/assets/check_mark.png");
-            JLabel label = new JLabel(icon.getImage());
+            //IconResize icon = new IconResize("src/resource/assets/check_mark.png");
+            //JLabel label = new JLabel(icon.getImage());
 
             frame.add(new JLabel("Select an application to launch:"));
             frame.add(appList);
             frame.add(launchButton);
             frame.setResizable(false);
             frame.setVisible(true);
-            frame.add(label);
+            //frame.add(label);
         });
     }
 

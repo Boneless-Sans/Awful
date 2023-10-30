@@ -1,6 +1,6 @@
 package src.code.u2l7.part7;
 
-import src.java.utils.FileReaderSaver;
+//import src.java.utils.FileReaderSaver;
 import java.io.FileNotFoundException;
 
 public class FoodTruckRunner {
@@ -22,7 +22,7 @@ public class FoodTruckRunner {
         }
 
         // Create an instance of FileReaderSaver and use it to save and read files
-        FileReaderSaver.save("this is fucking awful text ON GOD", "src/resource/data/output.txt");
-        System.out.println(FileReaderSaver.read("src/resource/data/output.txt"));
+        //FileReaderSaver.save("this is fucking awful text ON GOD", "src/resource/data/output.txt");
+        //System.out.println(FileReaderSaver.read("src/resource/data/output.txt"));
     }
 }
