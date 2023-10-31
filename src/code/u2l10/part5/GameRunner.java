@@ -4,5 +4,9 @@ public class GameRunner {
     public static void main(String[] args) {
         // Creates a Player object
         Player tetrisChamp = new Player(682);
+
+        tetrisChamp.setHighScore(531);
+
+        System.out.println(tetrisChamp);
     }
 }
