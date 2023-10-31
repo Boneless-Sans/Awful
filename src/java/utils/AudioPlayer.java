@@ -3,17 +3,18 @@ package src.java.utils;
 import javax.sound.sampled.*;
 import java.io.File;
 
-public class AudioPlayer{
-    private String fileName;
-    private AudioPlayer player;
-    public void play(String fileName){
-        try{
+public class AudioPlayer {
+    // Remove the 'player' instance and make the play method static.
+    public static void play(String fileName) {
+        // Add "src/resource/assets" before the file name.
+        String fullPath = "src/resource/assets/" + fileName;
+
+        try {
             Clip clip = AudioSystem.getClip();
-            clip.open(AudioSystem.getAudioInputStream(new File(fileName)));
+            clip.open(AudioSystem.getAudioInputStream(new File(fullPath)));
             clip.start();
-        }catch(Exception exc){
+        } catch (Exception exc) {
             exc.printStackTrace(System.out);
         }
-
     }
 }

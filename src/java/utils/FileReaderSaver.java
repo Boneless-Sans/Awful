@@ -17,7 +17,7 @@ public class FileReaderSaver {
         File file = new File(fileName);
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(data);
-            System.out.println("Data saved to " + file.getAbsolutePath());
+            System.out.println("Data saved to " + file.getAbsolutePath() + " (" + data + ")");
         } catch (IOException e) {
             e.printStackTrace();
         }
