@@ -20,11 +20,11 @@ public class GuessTheNumber {
     public static void main(String[] args){
         Scanner scanner = new Scanner(System.in);
         JFrame frame = new JFrame();
-        frame.setLayout(new FlowLayout(FlowLayout.CENTER));
+        frame.setLayout(null);
         frame.setSize(500,500);
 
         JPanel mainScreen = new JPanel();
-        mainScreen.setLayout(new FlowLayout());
+        mainScreen.setLayout(null);
         JLabel welcomeText = new JLabel("Welcome! Please Pick a Difficulty.");
         JButton buttonHard = new JButton("Hard");
         JButton buttonEasy = new JButton("Easy");
@@ -42,7 +42,7 @@ public class GuessTheNumber {
         buttonHard.setBounds(250,250,100,50);
 
         welcomeText.setFont(new Font("Arial", Font.PLAIN, 25));
-        //welcomeText.setBounds(50,0,500,100);
+        welcomeText.setBounds(50,0,500,100);
         mainScreen.setBackground(Color.LIGHT_GRAY);
         mainScreen.setSize(new Dimension(500,500));
 
