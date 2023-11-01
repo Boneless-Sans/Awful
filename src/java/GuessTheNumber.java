@@ -25,6 +25,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
     private JLabel tryCount;
     private JButton submitButton;
     private JButton scoreboardButton;
+    private JButton resetScore;
     private JPanel playPanel;
     private static ImageIcon icon = new ImageIcon("src/resource/assets/icon.png");;
     private final Random rand = new Random();
@@ -113,17 +114,18 @@ public class GuessTheNumber extends JFrame implements ActionListener {
                 playPanel.setBackground(Color.GREEN);
                 submitButton.setText("Scoreboard");
                 input.setEnabled(false);
+                if(FileReaderSaver.check("Guess_Number.savf")){
+                    FileReaderSaver.save("High Score: " + 999, "Guess_Number.savf");
+                }
                 String extractSave = FileReaderSaver.read("Guess_Number.savf");
                 String finalScore = extractSave.replaceAll("[^0-9]", "");
                 int savedScore = Integer.parseInt(finalScore);
                 if (savedScore > trys) {
-                    FileReaderSaver.delete("Guess_Number.savf");
+                    //FileReaderSaver.delete("Guess_Number.savf");
                     FileReaderSaver.save("High Score: " + trys, "Guess_Number.savf");
                     System.out.println("High Score Beaten!!\nNew High Score: " + finalScore);
                 } else if (savedScore == trys) {
                     System.out.println("High Score almost beat!\nHigh Score: " + finalScore + "\nYour Score: " + trys);
-                } else if ((savedScore == 1) && (trys == 1)) {
-                    System.out.println("Perfect Score!!");
                 } else if (savedScore < trys) {
                     System.out.println("High Score not Reached!\nHigh Score: " + finalScore + "Your Score: " + trys);
                 }
@@ -170,15 +172,19 @@ public class GuessTheNumber extends JFrame implements ActionListener {
                 JLabel answerText = new JLabel(Integer.toString(fixedNumber));
             }
 
-            JLabel answerText = new JLabel("High Score: " + Integer.toString(fixedNumber));
+            JLabel answerText = new JLabel("Number: " + Integer.toString(fixedNumber));
             JLabel scoreText = new JLabel("Your Score: " + trys);
+            JLabel highScoreText = new JLabel(FileReaderSaver.read("Guess_Number.savf"));
             answerText.setFont(new Font("Arial", Font.ITALIC, 15));
             scoreText.setFont(new Font("Arial", Font.ITALIC, 15));
-            answerText.setBounds(0,100,120,50);
-            scoreText.setBounds(0,150,120,50);
+            highScoreText.setFont(new Font("Arial", Font.ITALIC, 15));
+            answerText.setBounds(0,50,120,50);
+            scoreText.setBounds(0,100,120,50);
+            highScoreText.setBounds(0,150,120,50);
 
-            scoreBoard.add(scoreText);
             scoreBoard.add(answerText);
+            scoreBoard.add(scoreText);
+            scoreBoard.add(highScoreText);
             scoreBoard.add(exit);
             scoreBoard.setVisible(true);
         }
@@ -197,6 +203,13 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         JLabel welcomeText = new JLabel("Welcome! Please Pick a Difficulty.");
         JButton buttonHard = new JButton("Hard");
         JButton buttonEasy = new JButton("Easy");
+
+        JLabel highScore = new JLabel(FileReaderSaver.read("Guess_Number.savf"));
+        highScore.setFont(new Font("Arial", Font.ITALIC, 20));
+        highScore.setBounds(185,150,200,100);
+
+        JButton settingsButton = new JButton();
+        //TO-DO: Settings, change color scheme or (harder) custom colors
 
         buttonEasy.setFocusable(false);
         buttonHard.setFocusable(false);
@@ -240,6 +253,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         mainScreen.add(welcomeText);
         mainScreen.add(buttonEasy);
         mainScreen.add(buttonHard);
+        mainScreen.add(highScore);
 
         frame.add(mainScreen);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
