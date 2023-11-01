@@ -1,27 +1,196 @@
 package src.java;
 
 import src.java.utils.AudioPlayer;
-import src.java.utils.Windows;
+import src.java.utils.FileReaderSaver;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.util.Random;
 import java.util.Scanner;
 
-public class GuessTheNumber {
-    private int number;
-    private double hardNumber;
-    private boolean gameMode;
+public class GuessTheNumber extends JFrame implements ActionListener {
+    private int trys;
+    private static boolean gameModeHard = false;
+    private JFrame mainFrame;
+    private JFrame scoreBoard;
+    private JTextField input;
+    private JLabel hotText;
+    private JLabel tryCount;
+    private JButton submitButton;
+    private JButton scoreboardButton;
+    private JPanel playPanel;
+    private static ImageIcon icon = new ImageIcon("src/resource/assets/icon.png");;
+    private final Random rand = new Random();
+    private double randNumber = rand.nextInt(1,100);
 
     public GuessTheNumber(){
-        //gameplay loop
+        this.mainFrame = new JFrame(); // Move this line to the beginning
+        this.input = new JTextField();
+        this.hotText = new JLabel("Please pick a number");
+        this.submitButton = new JButton("Submit Answer");
+        this.playPanel = new JPanel();
+        this.scoreboardButton = new JButton("Scoreboard");
+
+        if(gameModeHard){
+            float randNumberMath = rand.nextFloat();
+            float min = 0.00f;
+            float max = 100.99f;
+            float moreMath = min + randNumberMath * (max - min);
+
+            DecimalFormat df = new DecimalFormat("#.##");
+            String format = df.format(moreMath);
+
+            BigDecimal bigDecimal = new BigDecimal(format);
+            bigDecimal = bigDecimal.setScale(2, RoundingMode.HALF_EVEN);
+
+            double randNumberHard = bigDecimal.doubleValue();
+
+            System.out.println("Hard Mode");
+            this.randNumber = randNumberHard;
+
+            mainFrame.setTitle("Guess The Number! (Hard Mode)");
+        }else{
+            mainFrame.setTitle("Guess The Number! (Easy Mode)");
+        }
+
+        mainFrame.setLayout(null);
+        mainFrame.setSize(new Dimension(500, 100));
+        mainFrame.getContentPane().setBackground(Color.GRAY);
+        mainFrame.setIconImage(icon.getImage());
+
+        input.setBounds(150, 6, 150, 50);
+        submitButton.setBounds(0, 6, 150, 50);
+        submitButton.setFocusable(false);
+        submitButton.setFont(new Font("Arial", Font.PLAIN, 17));
+        submitButton.setBorder(BorderFactory.createEtchedBorder());
+        submitButton.setBackground(Color.LIGHT_GRAY);
+        submitButton.addActionListener(this);
+
+        scoreboardButton.setBounds(0, 6, 150, 50);
+        scoreboardButton.setFocusable(false);
+        scoreboardButton.setFont(new Font("Arial", Font.PLAIN, 17));
+        scoreboardButton.setBorder(BorderFactory.createEtchedBorder());
+        scoreboardButton.setBackground(Color.LIGHT_GRAY);
+        scoreboardButton.addActionListener(this);
+
+        playPanel.setBounds(300, 6, 150, 50);
+        hotText.setFont(new Font("Arial", Font.PLAIN, 15));
+        hotText.setBounds(0, 0, 150, 50);
+        playPanel.add(hotText);
+        playPanel.setLayout(null);
+
+        tryCount = new JLabel("0");
+        tryCount.setFont(new Font("Comic Sans MS", Font.ITALIC, 15));
+        tryCount.setForeground(Color.BLACK);
+        tryCount.setBounds(462,6,50,50);
+
+        System.out.println(FileReaderSaver.check("Guess_Number.savf"));
+        System.out.println(randNumber);
+
+        mainFrame.add(submitButton);
+        mainFrame.add(input);
+        mainFrame.add(playPanel);
+        mainFrame.add(tryCount);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setVisible(true);
     }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == submitButton) {
+            if (randNumber == Double.parseDouble(input.getText())) {
+                trys++;
+                tryCount.setText(Integer.toString(trys));
+                hotText.setText("You Won!");
+                hotText.setFont(new Font("Arial", Font.PLAIN, 20));
+                hotText.setBounds(30, 0, 150, 50);
+                playPanel.setBackground(Color.GREEN);
+                submitButton.setText("Scoreboard");
+                input.setEnabled(false);
+                String extractSave = FileReaderSaver.read("Guess_Number.savf");
+                String finalScore = extractSave.replaceAll("[^0-9]", "");
+                int savedScore = Integer.parseInt(finalScore);
+                if (savedScore > trys) {
+                    FileReaderSaver.delete("Guess_Number.savf");
+                    FileReaderSaver.save("High Score: " + trys, "Guess_Number.savf");
+                    System.out.println("High Score Beaten!!\nNew High Score: " + finalScore);
+                } else if (savedScore == trys) {
+                    System.out.println("High Score almost beat!\nHigh Score: " + finalScore + "\nYour Score: " + trys);
+                } else if ((savedScore == 1) && (trys == 1)) {
+                    System.out.println("Perfect Score!!");
+                } else if (savedScore < trys) {
+                    System.out.println("High Score not Reached!\nHigh Score: " + finalScore + "Your Score: " + trys);
+                }
+                submitButton.setEnabled(false);
+                mainFrame.remove(submitButton);
+                mainFrame.add(scoreboardButton);
+
+            } else if (randNumber > Double.parseDouble(input.getText())) {
+                trys++;
+                tryCount.setText(Integer.toString(trys));
+                hotText.setText("Hotter");
+                hotText.setFont(new Font("Arial", Font.PLAIN, 20));
+                playPanel.setBackground(new Color(251, 139, 35));
+                hotText.setBounds(50, 0, 150, 50);
+            } else if (randNumber < Double.parseDouble(input.getText())) {
+                trys++;
+                tryCount.setText(Integer.toString(trys));
+                hotText.setText("Colder");
+                hotText.setFont(new Font("Arial", Font.PLAIN, 20));
+                playPanel.setBackground(new Color(37, 124, 255));
+                hotText.setBounds(50, 0, 150, 50);
+            }
+        }
+        if(e.getSource()==scoreboardButton) {
+            mainFrame.dispose();
+            scoreBoard = new JFrame();
+            scoreBoard.setTitle("Scoreboard");
+            scoreBoard.setSize(300, 250);
+            scoreBoard.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            scoreBoard.setLayout(null);
+            ImageIcon iconScoreboard = new ImageIcon("src/resource/assets/icon_scoreboard.png");
+            scoreBoard.setIconImage(iconScoreboard.getImage());
+
+            JButton exit = new JButton("Exit");
+            exit.addActionListener(a ->{
+                System.exit(69);
+            });
+
+            int fixedNumber = 0;
+            //check to see if it's a hard mode number, if not, convert to an int
+            if (randNumber == (int) randNumber) {
+                JLabel answerText = new JLabel(Integer.toString(fixedNumber = (int) randNumber));
+            } else {
+                JLabel answerText = new JLabel(Integer.toString(fixedNumber));
+            }
+
+            JLabel answerText = new JLabel("High Score: " + Integer.toString(fixedNumber));
+            JLabel scoreText = new JLabel("Your Score: " + trys);
+            answerText.setFont(new Font("Arial", Font.ITALIC, 15));
+            scoreText.setFont(new Font("Arial", Font.ITALIC, 15));
+            answerText.setBounds(0,100,120,50);
+            scoreText.setBounds(0,150,120,50);
+
+            scoreBoard.add(scoreText);
+            scoreBoard.add(answerText);
+            scoreBoard.add(exit);
+            scoreBoard.setVisible(true);
+        }
+    }
+
     public static void main(String[] args){
         Scanner scanner = new Scanner(System.in);
         JFrame frame = new JFrame();
         frame.setLayout(null);
         frame.setSize(500,500);
+        frame.setTitle("Guess The Number");
+        frame.setIconImage(icon.getImage());
 
         JPanel mainScreen = new JPanel();
         mainScreen.setLayout(null);
@@ -57,11 +226,15 @@ public class GuessTheNumber {
         });
         buttonEasy.addActionListener(e -> {
             AudioPlayer.play("select.wav");
+            gameModeHard = false;
             new GuessTheNumber();
+            frame.dispose();
         });
         buttonHard.addActionListener(e -> {
             AudioPlayer.play("select.wav");
+            gameModeHard = true;
             new GuessTheNumber();
+            frame.dispose();
         });
 
         mainScreen.add(welcomeText);
@@ -69,6 +242,7 @@ public class GuessTheNumber {
         mainScreen.add(buttonHard);
 
         frame.add(mainScreen);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setVisible(true);
     }

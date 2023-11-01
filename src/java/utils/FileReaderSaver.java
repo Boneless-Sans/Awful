@@ -44,4 +44,29 @@ public class FileReaderSaver {
             return "Error reading the file.";
         }
     }
+    public static boolean delete(String fileName) {
+        if (fileName.indexOf('/') == -1) {
+            // No directory provided, use the default directory
+            fileName = "src/resource/data/" + fileName;
+        }
+
+        File file = new File(fileName);
+
+        if (file.exists()) {
+            if (file.delete()) {
+                return true; // File was successfully deleted
+            } else {
+                return false; // Failed to delete the file
+            }
+        } else {
+            return false; // File doesn't exist
+        }
+    }
+    public static boolean check(String fileName){
+        if(fileName.indexOf('/') == -1){
+            fileName = "src/resource/data" + fileName;
+        }
+        File file = new File(fileName);
+        return file.exists();
+    }
 }
