@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -25,11 +26,27 @@ public class GuessTheNumber extends JFrame implements ActionListener {
     private JLabel tryCount;
     private JButton submitButton;
     private JButton scoreboardButton;
+    private static JButton settingsButton;
     private JButton resetScore;
     private JPanel playPanel;
     private static ImageIcon icon = new ImageIcon("src/resource/assets/icon.png");;
     private final Random rand = new Random();
     private double randNumber = rand.nextInt(1,100);
+
+    private String buttonColors = Arrays.toString(new Color[]{
+            Color.RED,
+            Color.ORANGE,
+            Color.YELLOW,
+            Color.GREEN,
+            Color.BLUE,
+            Color.CYAN,
+            Color.MAGENTA,
+            Color.BLACK,
+            Color.WHITE,
+            Color.LIGHT_GRAY,
+            Color.GREEN,
+            Color.DARK_GRAY
+    });
 
     public GuessTheNumber(){
         this.mainFrame = new JFrame(); // Move this line to the beginning
@@ -101,6 +118,11 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         mainFrame.add(tryCount);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
+    }
+    public GuessTheNumber(int settings){
+        this.setSize(new Dimension(500,500));
+
+        this.setVisible(true);
     }
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -206,9 +228,8 @@ public class GuessTheNumber extends JFrame implements ActionListener {
 
         JLabel highScore = new JLabel(FileReaderSaver.read("Guess_Number.savf"));
         highScore.setFont(new Font("Arial", Font.ITALIC, 20));
-        highScore.setBounds(185,150,200,100);
+        highScore.setBounds(185,125,200,100);
 
-        JButton settingsButton = new JButton();
         //TO-DO: Settings, change color scheme or (harder) custom colors
 
         buttonEasy.setFocusable(false);
@@ -228,12 +249,22 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         mainScreen.setBackground(Color.LIGHT_GRAY);
         mainScreen.setSize(new Dimension(500,500));
 
+        settingsButton = new JButton("Settings");
+        settingsButton.setFont(new Font("Arial", Font.ITALIC,17));
+        settingsButton.setBounds(200,350,100,50);
+        settingsButton.setFocusable(false);
+        settingsButton.setBackground(Color.GRAY);
+
         buttonEasy.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {AudioPlayer.play("hover.wav");}
 
         });
         buttonHard.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {AudioPlayer.play("hover.wav");}
+        });
+        settingsButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {AudioPlayer.play("hover.wav");}
         });
@@ -249,11 +280,16 @@ public class GuessTheNumber extends JFrame implements ActionListener {
             new GuessTheNumber();
             frame.dispose();
         });
-
+        settingsButton.addActionListener(e -> {
+            AudioPlayer.play("select.wav");
+            new GuessTheNumber(1);
+            settingsButton.setEnabled(false);
+        });
         mainScreen.add(welcomeText);
         mainScreen.add(buttonEasy);
         mainScreen.add(buttonHard);
         mainScreen.add(highScore);
+        mainScreen.add(settingsButton);
 
         frame.add(mainScreen);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
