@@ -277,7 +277,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         buttonHard.addActionListener(e -> {
             AudioPlayer.play("select.wav");
             gameModeHard = true;
-            new GuessTheNumber();
+            new GuessTheNumber()
             frame.dispose();
         });
         settingsButton.addActionListener(e -> {
