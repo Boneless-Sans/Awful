@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -18,6 +19,9 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GuessTheNumber extends JFrame implements ActionListener {
+    private String extractSave;
+    private String finalScore;
+    private int savedScore;
     private int trys;
     private static boolean gameModeHard = false;
     private JFrame mainFrame;
@@ -158,17 +162,17 @@ public class GuessTheNumber extends JFrame implements ActionListener {
                 if(FileReaderSaver.check("Guess_Number.savf")){
                     FileReaderSaver.save("High Score: " + 999, "Guess_Number.savf");
                 }
-                String extractSave = FileReaderSaver.read("Guess_Number.savf");
-                String finalScore = extractSave.replaceAll("[^0-9]", "");
-                int savedScore = Integer.parseInt(finalScore);
-                if (savedScore > trys) {
-                    //FileReaderSaver.delete("Guess_Number.savf");
+                extractSave = FileReaderSaver.read("Guess_Number.savf");
+                finalScore = extractSave.replaceAll("[^0-9]", "");
+                System.out.println(savedScore);
+                if (trys < savedScore) {
+                    FileReaderSaver.delete("Guess_Number.savf");
                     FileReaderSaver.save("High Score: " + trys, "Guess_Number.savf");
                     System.out.println("High Score Beaten!!\nNew High Score: " + finalScore);
                 } else if (savedScore == trys) {
                     System.out.println("High Score almost beat!\nHigh Score: " + finalScore + "\nYour Score: " + trys);
-                } else if (savedScore < trys) {
-                    System.out.println("High Score not Reached!\nHigh Score: " + finalScore + "Your Score: " + trys);
+                } else if (trys > savedScore) {
+                    System.out.println("High Score not Reached!\nHigh Score: " + finalScore + "\nYour Score: " + trys);
                 }
                 submitButton.setEnabled(false);
                 mainFrame.remove(submitButton);
@@ -199,6 +203,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
             scoreBoard.setLayout(null);
             ImageIcon iconScoreboard = new ImageIcon("src/resource/assets/icon_scoreboard.png");
             scoreBoard.setIconImage(iconScoreboard.getImage());
+            //FileReaderSaver.save("High Score: " + savedScore, "Guess_Number.savf");
 
             JButton exit = new JButton("Exit");
             exit.addActionListener(a ->{
@@ -322,3 +327,4 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         frame.setVisible(true);
     }
 }
+//should probably add some comments, so it's not a nightmare to read

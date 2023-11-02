@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 
 public class FileReaderSaver {
-    public static void save(String data, String fileName) {
+    public static void save(Object data, String fileName) {
         if (fileName.indexOf('/') == -1) {
             // No directory provided, use the default directory
             fileName = "src/resource/data/" + fileName;
@@ -16,7 +16,7 @@ public class FileReaderSaver {
 
         File file = new File(fileName);
         try (FileWriter writer = new FileWriter(file)) {
-            writer.write(data);
+            writer.write(data.toString());
             System.out.println("Data saved to " + file.getAbsolutePath() + " (" + data + ")");
         } catch (IOException e) {
             e.printStackTrace();
