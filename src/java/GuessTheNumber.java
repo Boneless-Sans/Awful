@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GuessTheNumber extends JFrame implements ActionListener {
     private int trys;
@@ -28,6 +29,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
     private JButton scoreboardButton;
     private static JButton settingsButton;
     private JButton resetScore;
+    private JButton close;
     private JPanel playPanel;
     private static ImageIcon icon = new ImageIcon("src/resource/assets/icon.png");;
     private final Random rand = new Random();
@@ -121,7 +123,24 @@ public class GuessTheNumber extends JFrame implements ActionListener {
     }
     public GuessTheNumber(int settings){
         this.setSize(new Dimension(500,500));
+        ImageIcon icon = new ImageIcon("src/resource/assets/icon_scoreboard.png");
+        this.setIconImage(icon.getImage());
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.setLayout(null);
 
+        close = new JButton("Close");
+        close.setBounds(200,350,100,50);
+        close.addActionListener(this);
+        close.setBackground(Color.GRAY);
+        close.setFocusable(false);
+        close.setFont(new Font("Arial", Font.PLAIN,20));
+        close.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {AudioPlayer.play("hover.wav");}
+        });
+
+
+        this.add(close);
         this.setVisible(true);
     }
     @Override
@@ -250,10 +269,11 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         mainScreen.setSize(new Dimension(500,500));
 
         settingsButton = new JButton("Settings");
-        settingsButton.setFont(new Font("Arial", Font.ITALIC,17));
-        settingsButton.setBounds(200,350,100,50);
+        settingsButton.setFont(new Font("Arial", Font.ITALIC,20));
+        settingsButton.setBounds(200,350,110,50);
         settingsButton.setFocusable(false);
         settingsButton.setBackground(Color.GRAY);
+        AtomicBoolean disabled = new AtomicBoolean(false);
 
         buttonEasy.addMouseListener(new MouseAdapter() {
             @Override
@@ -266,7 +286,11 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         });
         settingsButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {AudioPlayer.play("hover.wav");}
+            public void mouseEntered(MouseEvent e) {
+                if(!disabled.get()){
+                    AudioPlayer.play("hover.wav");
+                }
+            }
         });
         buttonEasy.addActionListener(e -> {
             AudioPlayer.play("select.wav");
@@ -277,13 +301,14 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         buttonHard.addActionListener(e -> {
             AudioPlayer.play("select.wav");
             gameModeHard = true;
-            new GuessTheNumber()
+            new GuessTheNumber();
             frame.dispose();
         });
         settingsButton.addActionListener(e -> {
             AudioPlayer.play("select.wav");
             new GuessTheNumber(1);
             settingsButton.setEnabled(false);
+            disabled.set(true);
         });
         mainScreen.add(welcomeText);
         mainScreen.add(buttonEasy);
