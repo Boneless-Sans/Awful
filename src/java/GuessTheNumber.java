@@ -2,6 +2,7 @@ package src.java;
 
 import src.java.utils.AudioPlayer;
 import src.java.utils.FileReaderSaver;
+import src.java.utils.NormalButtons;
 
 import javax.swing.*;
 import java.awt.*;

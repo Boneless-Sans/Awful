@@ -9,29 +9,31 @@ public class IconResize {
     private int width;
     private int height;
 
+    private static final String DEFAULT_PATH = "src/resource/assets/";
+
     public IconResize() {
-        icon = "default.png";
+        icon = DEFAULT_PATH + "default.png";
         width = 100;
         height = 100;
+        loadImage();
     }
+
     public IconResize(String icon, int width, int height) {
-        //must run before being called!!
-        ImageIcon originalIcon = new ImageIcon(icon);
-        Image image = originalIcon.getImage();
-        Image newImg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        imageIcon = new ImageIcon(newImg);
+        this.icon = icon.startsWith(DEFAULT_PATH) ? icon : DEFAULT_PATH + icon;
+        this.width = width;
+        this.height = height;
+        loadImage();
     }
-    public void set(String icon, int width, int height) {
-        //must run before being called!!
-        ImageIcon originalIcon = new ImageIcon(icon);
-        Image image = originalIcon.getImage();
-        Image newImg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        imageIcon = new ImageIcon(newImg);
-    }
+
     public IconResize(String icon) {
-        //must run before being called!!
+        this.icon = icon.startsWith(DEFAULT_PATH) ? icon : DEFAULT_PATH + icon;
         width = 50;
         height = 50;
+        loadImage();
+    }
+
+    private void loadImage() {
+        // Must run before being called!!
         ImageIcon originalIcon = new ImageIcon(icon);
         Image image = originalIcon.getImage();
         Image newImg = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);

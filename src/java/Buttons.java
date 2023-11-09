@@ -11,8 +11,7 @@ public class Buttons extends JFrame{
     JButton button;
     JLabel label;
     public Buttons(){
-        IconResize icon = new IconResize();
-        icon.set("src/resource/assets/pic.png", 50,50);
+        IconResize icon = new IconResize("src/resource/assets/pic.png", 50,50);
 
         AudioPlayer clip = new AudioPlayer();
 

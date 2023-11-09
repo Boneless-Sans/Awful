@@ -10,11 +10,9 @@ public class Drunk extends JFrame {
     JLabel label;
 
     public Drunk(){
-        IconResize icon = new IconResize();
-        icon.set("src/resource/assets/erm.png", 50, 50);
+        IconResize icon = new IconResize("src/resource/assets/icon.png", 100,100);
         AudioPlayer clip = new AudioPlayer();
 
-        icon.set("src/resource/assets/icon.png", 100,100);
         label = new JLabel();
         button = new JButton();
 

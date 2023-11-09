@@ -8,8 +8,7 @@ import java.awt.*;
 
 public class Panels {
     public static void main(String[] args){
-        IconResize icon = new IconResize();
-        icon.set("src/resource/assets/pic.png", 50,50);
+        IconResize icon = new IconResize("src/resource/assets/pic.png", 50,50);
 
         //AudioPlayer clip = new AudioPlayer();
 
