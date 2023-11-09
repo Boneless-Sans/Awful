@@ -155,7 +155,14 @@ public class Main {
                 String packageName = Main.class.getPackage().getName();
                 JarFile sourceJarFile = new JarFile(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 
-                String compiledJarPath = "./compiled/" + appName + ".jar";
+                String compiledJarPath = "./" + appName + ".jar";
+
+                // Create the compiled directory if it doesn't exist
+                File compiledDir = new File("./");
+                if (!compiledDir.exists()) {
+                    compiledDir.mkdirs();
+                }
+
                 JarOutputStream targetJarStream = new JarOutputStream(new FileOutputStream(compiledJarPath));
 
                 Enumeration<JarEntry> entries = sourceJarFile.entries();
@@ -193,6 +200,7 @@ public class Main {
             }
         });
     }
+
 
     private static void showBuildFailedWindow(String errorMessage, String stackTrace) {
         SwingUtilities.invokeLater(() -> {
@@ -267,7 +275,7 @@ public class Main {
                             .filter(Files::isRegularFile)
                             .forEach(file -> {
                                 try {
-                                    String entryName = "assets/" + assetsDir.toPath().relativize(file).toString();
+                                    String entryName = "src/resource/assets/" + assetsDir.toPath().relativize(file).toString();
                                     targetJarStream.putNextEntry(new JarEntry(entryName));
                                     Files.copy(file, targetJarStream);
                                     targetJarStream.closeEntry();
