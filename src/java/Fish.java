@@ -21,6 +21,7 @@ public class Fish extends JFrame {
         IconResize icon = new IconResize("le_fishe.png", 10,10);
         icon.set("le_fishe.png", 10,10);
         JLabel fish = new JLabel(icon.getImage());
+        fish.add(new JLabel("text"));
 
         add(panelText);
         add(fish);
