@@ -153,6 +153,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         if (e.getSource() == submitButton) {
             if (randNumber == Double.parseDouble(input.getText())) {
                 trys++;
+                AudioPlayer.play("correct.wav");
                 tryCount.setText(Integer.toString(trys));
                 hotText.setText("You Won!");
                 hotText.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -181,6 +182,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
 
             } else if (randNumber > Double.parseDouble(input.getText())) {
                 trys++;
+                AudioPlayer.play("incorrect.wav");
                 tryCount.setText(Integer.toString(trys));
                 hotText.setText("Hotter");
                 hotText.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -188,6 +190,7 @@ public class GuessTheNumber extends JFrame implements ActionListener {
                 hotText.setBounds(50, 0, 150, 50);
             } else if (randNumber < Double.parseDouble(input.getText())) {
                 trys++;
+                AudioPlayer.play("incorrect.wav");
                 tryCount.setText(Integer.toString(trys));
                 hotText.setText("Colder");
                 hotText.setFont(new Font("Arial", Font.PLAIN, 20));
