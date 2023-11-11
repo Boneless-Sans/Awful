@@ -10,19 +10,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GuessTheNumber extends JFrame implements ActionListener {
     private String extractSave;
     private String finalScore;
-    private int savedScore;
     private int trys;
     private static boolean gameModeHard = false;
     private JFrame mainFrame;
@@ -34,26 +33,10 @@ public class GuessTheNumber extends JFrame implements ActionListener {
     private JButton scoreboardButton;
     private static JButton settingsButton;
     private JButton resetScore;
-    private JButton close;
     private JPanel playPanel;
     private static ImageIcon icon = new ImageIcon("src/resource/assets/icon.png");;
     private final Random rand = new Random();
     private double randNumber = rand.nextInt(1,100);
-
-    private String buttonColors = Arrays.toString(new Color[]{
-            Color.RED,
-            Color.ORANGE,
-            Color.YELLOW,
-            Color.GREEN,
-            Color.BLUE,
-            Color.CYAN,
-            Color.MAGENTA,
-            Color.BLACK,
-            Color.WHITE,
-            Color.LIGHT_GRAY,
-            Color.GREEN,
-            Color.DARK_GRAY
-    });
 
     public GuessTheNumber(){
         this.mainFrame = new JFrame(); // Move this line to the beginning
@@ -126,59 +109,11 @@ public class GuessTheNumber extends JFrame implements ActionListener {
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
     }
-    public GuessTheNumber(int settings){
-        this.setSize(new Dimension(500,500));
-        ImageIcon icon = new ImageIcon("src/resource/assets/icon_scoreboard.png");
-        this.setIconImage(icon.getImage());
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        this.setLayout(null);
-
-        close = new JButton("Close");
-        close.setBounds(200,350,100,50);
-        close.addActionListener(this);
-        close.setBackground(Color.GRAY);
-        close.setFocusable(false);
-        close.setFont(new Font("Arial", Font.PLAIN,20));
-        close.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {AudioPlayer.play("hover.wav");}
-        });
-
-
-        this.add(close);
-        this.setVisible(true);
-    }
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == submitButton) {
             if (randNumber == Double.parseDouble(input.getText())) {
                 trys++;
-                AudioPlayer.play("correct.wav");
-                tryCount.setText(Integer.toString(trys));
-                hotText.setText("You Won!");
-                hotText.setFont(new Font("Arial", Font.PLAIN, 20));
-                hotText.setBounds(30, 0, 150, 50);
-                playPanel.setBackground(Color.GREEN);
-                submitButton.setText("Scoreboard");
-                input.setEnabled(false);
-                if(FileReaderSaver.check("Guess_Number.savf")){
-                    FileReaderSaver.save("High Score: " + 999, "Guess_Number.savf");
-                }
-                extractSave = FileReaderSaver.read("Guess_Number.savf");
-                finalScore = extractSave.replaceAll("[^0-9]", "");
-                System.out.println(savedScore);
-                if (trys < savedScore) {
-                    FileReaderSaver.delete("Guess_Number.savf");
-                    FileReaderSaver.save("High Score: " + trys, "Guess_Number.savf");
-                    System.out.println("High Score Beaten!!\nNew High Score: " + finalScore);
-                } else if (savedScore == trys) {
-                    System.out.println("High Score almost beat!\nHigh Score: " + finalScore + "\nYour Score: " + trys);
-                } else if (trys > savedScore) {
-                    System.out.println("High Score not Reached!\nHigh Score: " + finalScore + "\nYour Score: " + trys);
-                }
-                submitButton.setEnabled(false);
-                mainFrame.remove(submitButton);
-                mainFrame.add(scoreboardButton);
 
             } else if (randNumber > Double.parseDouble(input.getText())) {
                 trys++;
@@ -210,17 +145,11 @@ public class GuessTheNumber extends JFrame implements ActionListener {
             //FileReaderSaver.save("High Score: " + savedScore, "Guess_Number.savf");
 
             JButton exit = new JButton("Exit");
-            exit.addActionListener(a ->{
+            exit.addActionListener(e1 ->{
                 System.exit(69);
             });
 
             int fixedNumber = 0;
-            //check to see if it's a hard mode number, if not, convert to an int
-            if (randNumber == (int) randNumber) {
-                JLabel answerText = new JLabel(Integer.toString(fixedNumber = (int) randNumber));
-            } else {
-                JLabel answerText = new JLabel(Integer.toString(fixedNumber));
-            }
 
             JLabel answerText = new JLabel("Number: " + Integer.toString(fixedNumber));
             JLabel scoreText = new JLabel("Your Score: " + trys);
@@ -241,7 +170,6 @@ public class GuessTheNumber extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args){
-        Scanner scanner = new Scanner(System.in);
         JFrame frame = new JFrame();
         frame.setLayout(null);
         frame.setSize(500,500);
@@ -314,10 +242,22 @@ public class GuessTheNumber extends JFrame implements ActionListener {
             frame.dispose();
         });
         settingsButton.addActionListener(e -> {
-            AudioPlayer.play("select.wav");
-            new GuessTheNumber(1);
-            settingsButton.setEnabled(false);
-            disabled.set(true);
+            JFrame settingsFrame = new JFrame("Settings");
+            settingsFrame.setSize(300,200);
+            settingsFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            settingsFrame.getContentPane().setBackground(Color.lightGray);
+            //settingsFrame.setLayout(new BorderLayout());
+
+            JPanel buzzerPanel = new JPanel();
+            buzzerPanel.setLayout(new BorderLayout());
+
+            JButton buzzer = new JButton("Buzzer");
+
+            buzzer.add(buzzer, BorderLayout.CENTER);
+
+            buzzerPanel.setBounds(20,20,settingsFrame.getWidth() - 2 * 20, settingsFrame.getHeight() - 2 * 20);
+
+            settingsFrame.setVisible(true);
         });
         mainScreen.add(welcomeText);
         mainScreen.add(buttonEasy);
