@@ -1,9 +1,10 @@
 <component name="libraryTable">
-  <library name="java">
+  <library name="java1">
     <CLASSES />
     <JAVADOC />
     <SOURCES>
       <root url="file:///Library/Java/jtouchbar-1.0.0/src/main/java" />
+      <root url="file:///Library/Java/jtouchbar-1.0.0/src/test/java" />
     </SOURCES>
   </library>
 </component>
