@@ -1,5 +1,6 @@
 package com.boneless.projects.utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -8,7 +9,7 @@ import java.io.*;
 
 public class JsonFile {
 
-    private static final String DEFAULT_DIRECTORY = "/src/resources/data/";
+    private static final String DEFAULT_DIRECTORY = "/src/main/resources/data/";
 
     public static String read(String filename, String mainKey, String valueKey) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
@@ -102,6 +103,57 @@ public class JsonFile {
 
         return "invalid key";
     }
+
+    public static String[][] readTiles(String filename, String mainKey, String subKey) {
+        try (Reader reader = new FileReader(getFilePath(filename))) {
+            JSONTokener tokener = new JSONTokener(reader);
+            JSONObject jsonObject = new JSONObject(tokener);
+
+            if (jsonObject.has(mainKey)) {
+                Object mainValue = jsonObject.get(mainKey);
+
+                if (mainValue instanceof JSONObject) {
+                    JSONObject subObject = (JSONObject) mainValue;
+
+                    if (subObject.has(subKey)) {
+                        Object tilesValue = subObject.get(subKey);
+
+                        if (tilesValue instanceof JSONArray) {
+                            JSONArray tilesArray = (JSONArray) tilesValue;
+                            int rows = tilesArray.length();
+                            int columns = ((JSONArray) tilesArray.get(0)).length();
+                            String[][] tiles = new String[rows][columns];
+
+                            for (int i = 0; i < rows; i++) {
+                                JSONArray rowArray = (JSONArray) tilesArray.get(i);
+
+                                for (int j = 0; j < columns; j++) {
+                                    tiles[i][j] = rowArray.getString(j);
+                                }
+                            }
+                            return tiles;
+                        } else {
+                            System.out.println("Invalid tiles array type");
+                        }
+                    } else {
+                        System.out.println("Invalid subKey for tiles");
+                    }
+                } else {
+                    System.out.println("Invalid mainKey type");
+                }
+            } else {
+                System.out.println("Invalid mainKey");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 
 
     public static void writeln(String filename, String mainKey, String valueKey, String value) {
