@@ -8,6 +8,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -142,15 +144,26 @@ public class Painter extends JFrame {
     }
 
     private class DrawingPanel extends JPanel {
-        private BufferedImage painterImage;
+        private JLabel painterLabel;
 
         DrawingPanel() {
             try {
-                // Load the image from resources
-                painterImage = ImageIO.read(new File("src/main/resources/assets/images/painter.png"));
+                // Load the image from resources using ImageIcon
+                InputStream inputStream = getClass().getResourceAsStream("/assets/images/painter.png");
+                ImageIcon painterIcon = new ImageIcon(ImageIO.read(inputStream));
+
+                // Create a JLabel with the ImageIcon
+                painterLabel = new JLabel(painterIcon);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            // Set layout to null to position the JLabel manually
+            setLayout(null);
+            add(painterLabel);
+
+            // Set the size of the JLabel
+            painterLabel.setBounds(0, 0, 50, 50);
         }
 
         @Override
@@ -162,12 +175,6 @@ public class Painter extends JFrame {
 
             // Draw the player layer
             drawLayer(g, playerLayer);
-
-            // Draw the rotated painter image at its current position
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.rotate(Math.toRadians(getRotationAngle()), xPos * 50 + 25, yPos * 50 + 25);
-            g2d.drawImage(painterImage, xPos * 50, yPos * 50, null);
-            g2d.rotate(-Math.toRadians(getRotationAngle()), xPos * 50 + 25, yPos * 50 + 25);
         }
 
         private void drawLayer(Graphics g, JPanel[][] layer) {
@@ -177,6 +184,13 @@ public class Painter extends JFrame {
                     g.fillRect(x * 50, y * 50, 50, 50);
                 }
             }
+        }
+
+        // Add a method to update the painter's position
+        public void updatePainterPosition(int x, int y) {
+            // Update the position of the JLabel
+            painterLabel.setLocation(x * 50, y * 50);
+            repaint(); // Trigger repaint to update the layers
         }
     }
 
@@ -189,8 +203,22 @@ public class Painter extends JFrame {
             painterListener.onPainterMove(xPos, yPos, facingDirection);
         }
 
+        // Update the painter's position on the DrawingPanel
+        if (getContentPane().getComponent(1) instanceof DrawingPanel) {
+            ((DrawingPanel) getContentPane().getComponent(1)).updatePainterPosition(x, y);
+        } else {
+            System.out.println("DrawingPanel not found in the content pane.");
+        }
+
         repaint(); // Trigger repaint on the DrawingPanel
     }
+    // Add a method to update the painter's position
+    public void updatePainterPosition(int x, int y) {
+        // Update the position of the JLabel
+        painterLabel.setLocation(x * 50, y * 50);
+        repaint(); // Trigger repaint to update the layers
+    }
+
 
     private void changePanelColor(int x, int y, Color color, JPanel[][] layer) {
         if (isValidCoordinate(x, y)) {
