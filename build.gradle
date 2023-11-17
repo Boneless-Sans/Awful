@@ -17,7 +17,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class' : 'com.boneless.code.Neighborhood.NeighborhoodRunner'
+        attributes 'Main-Class' : 'com.boneless.projects.Main'
     }
 
     from {

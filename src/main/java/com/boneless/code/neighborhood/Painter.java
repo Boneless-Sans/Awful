@@ -4,6 +4,7 @@ import com.boneless.projects.utils.JsonFile;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,23 +20,34 @@ public class Painter extends JFrame {
 
     // Use a red square as a placeholder for the painter image
     private Color painterColor = Color.RED;
+    private int padding = 1; // Number of tiles for padding
+
+    private BufferedImage buffer; // Offscreen image for double buffering
 
     public Painter() {
-        this(0, 0, "east"); // Call the parameterized constructor with default values
+        this(0, 0, "east", false); // Call the parameterized constructor with default values and use tile gaps
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
-    public Painter(int initialX, int initialY, String initialDirection) {
+    public Painter(int initialX, int initialY, String initialDirection, boolean useTileGaps) {
         initializeBoardSize();
         initializeTileColors();
 
         setTitle("Painter");
-        setSize(tileSize * boardWidth, tileSize * boardHeight);
+
+        int frameWidth = tileSize * (boardWidth + 2 * padding);
+        int frameHeight = tileSize * (boardHeight + 2 * padding);
+
+        setSize(frameWidth, frameHeight);
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
 
         setInitialPosition(initialX, initialY, initialDirection);
+
+        buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+
         setVisible(true);
     }
 
@@ -51,8 +63,8 @@ public class Painter extends JFrame {
     }
 
     private void setInitialPosition(int initialX, int initialY, String initialDirection) {
-        playerX = Math.max(0, Math.min(initialX, boardWidth - 1));
-        playerY = Math.max(0, Math.min(initialY, boardHeight - 1));
+        playerX = Math.max(padding, Math.min(initialX + padding, boardWidth + padding - 1));
+        playerY = Math.max(padding, Math.min(initialY + padding, boardHeight + padding - 1));
         facingDirection = initialDirection;
     }
 
@@ -63,13 +75,13 @@ public class Painter extends JFrame {
 
     public void move() {
         // Implement movement logic based on the facing direction
-        if ("north".equals(facingDirection) && playerY > 0) {
+        if ("north".equals(facingDirection) && playerY > padding) {
             playerY--;
-        } else if ("south".equals(facingDirection) && playerY < boardHeight - 1) {
+        } else if ("south".equals(facingDirection) && playerY < boardHeight + padding - 1) {
             playerY++;
-        } else if ("west".equals(facingDirection) && playerX > 0) {
+        } else if ("west".equals(facingDirection) && playerX > padding) {
             playerX--;
-        } else if ("east".equals(facingDirection) && playerX < boardWidth - 1) {
+        } else if ("east".equals(facingDirection) && playerX < boardWidth + padding - 1) {
             playerX++;
         }
 
@@ -111,7 +123,7 @@ public class Painter extends JFrame {
 
     public void paint(Color color) {
         // Paint the tile below the player with the specified color
-        String tileKey = playerX + "," + playerY;
+        String tileKey = (playerX - padding) + "," + (playerY - padding);
         if (!paintedTiles.containsKey(tileKey)) {
             paintedTiles.put(tileKey, color);
             repaint();
@@ -124,31 +136,56 @@ public class Painter extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
+        // Draw to the offscreen image first
+        Graphics bufferGraphics = buffer.getGraphics();
+        bufferGraphics.setColor(getBackground());
+        bufferGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        // Draw the board with tiles, painted tiles, and player
-        for (int y = 0; y < boardHeight; y++) {
-            for (int x = 0; x < boardWidth; x++) {
+        // Draw the board with tiles, painted tiles, and player on the offscreen image
+        for (int y = 0; y < boardHeight + 2 * padding; y++) {
+            for (int x = 0; x < boardWidth + 2 * padding; x++) {
                 int xPos = x * tileSize;
                 int yPos = y * tileSize;
 
                 // Draw the tile
-                g.setColor(tileColors.get("default"));
-                g.fillRect(xPos, yPos, tileSize, tileSize);
+                bufferGraphics.setColor(tileColors.get("default"));
+                bufferGraphics.fillRect(xPos, yPos, tileSize, tileSize);
 
                 // Draw the painted tile
-                String tileKey = x + "," + y;
+                String tileKey = (x - padding) + "," + (y - padding);
                 if (paintedTiles.containsKey(tileKey)) {
-                    g.setColor(paintedTiles.get(tileKey));
-                    g.fillRect(xPos, yPos, tileSize, tileSize);
+                    bufferGraphics.setColor(paintedTiles.get(tileKey));
+                    bufferGraphics.fillRect(xPos, yPos, tileSize, tileSize);
                 }
 
                 // Draw the painter as a red square
                 if (x == playerX && y == playerY) {
-                    g.setColor(painterColor);
-                    g.fillRect(xPos, yPos, tileSize, tileSize);
+                    bufferGraphics.setColor(painterColor);
+                    bufferGraphics.fillRect(xPos, yPos, tileSize, tileSize);
                 }
             }
         }
+
+        // Copy the offscreen image to the screen
+        g.drawImage(buffer, 0, 0, this);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            // Use the default constructor
+            Painter painter = new Painter();
+
+            // Alternatively, use the parameterized constructor
+            // Painter painter = new Painter(2, 2, "DOWN", false);
+
+            // Example movements and painting
+            painter.move();
+            painter.turnLeft();
+            painter.move();
+            painter.paint(Color.BLUE); // Paint the tile below the player in blue
+
+            // Retrieve and print the facing direction
+            System.out.println("Facing Direction: " + painter.getFacingDirection());
+        });
     }
 }
