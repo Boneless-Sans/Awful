@@ -11,6 +11,7 @@ public class PainterPlus extends Painter implements KeyListener {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
 
+    private Color color;
     @Override
     public void keyTyped(KeyEvent e) {
         switch(e.getKeyChar()){
@@ -44,8 +45,11 @@ public class PainterPlus extends Painter implements KeyListener {
             case'q':
                 turnLeft();
                 break;
+            case'c':
+                new ColorPicker();
+                break;
             case' ':
-                paint(Color.BLACK);
+                paint(color);
                 System.out.println("Painted");
                 break;
         }

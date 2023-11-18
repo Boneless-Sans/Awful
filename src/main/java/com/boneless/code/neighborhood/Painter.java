@@ -18,17 +18,18 @@ public class Painter extends JFrame {
     private int tileSize = 50; // Size of each tile
     private int boardWidth, boardHeight;
     private int playerX, playerY;
+    private int padding = 1; // Number of tiles for padding
+
     private double scale = Double.parseDouble(JsonFile.read("painter.json", "default", "scale"));
     private String facingDirection = "east"; // Initial direction (east)
-
     private Map<String, Image> tileImages = new HashMap<>();
     private Map<String, Color> paintedTiles = new HashMap<>();
     private BufferedImage painterImage;
 
-    private int padding = 1; // Number of tiles for padding
     private double scaleFactor = 1.5; // Default scaling factor
-
     private BufferedImage buffer; // Offscreen image for double buffering
+
+    private final int scaledTileSize = (int) (scaleFactor * tileSize);
 
     public Painter() {
         this(0, 0, "east"); // Call the parameterized constructor with default values and use tile gaps
@@ -43,15 +44,14 @@ public class Painter extends JFrame {
 
         setTitle("Painter");
 
-        int frameWidth = (int) (scaleFactor * tileSize * (boardWidth + 2 * padding)) + getInsets().left + getInsets().right;
-        int frameHeight = (int) (scaleFactor * tileSize * (boardHeight + 2 * padding)) + getInsets().top + getInsets().bottom;
+        int frameWidth = (int) (scaleFactor * tileSize * boardWidth);
+        int frameHeight = (int) (scaleFactor * tileSize * boardHeight) + 35;
 
-
-        setSize(frameWidth, frameHeight + 35);
+        setSize(frameWidth, frameHeight);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        // setResizable(false);
 
         setInitialPosition(initialX, initialY, initialDirection);
 
@@ -59,20 +59,21 @@ public class Painter extends JFrame {
 
         setVisible(true);
     }
+
     private void initializeBoardSize() {
         // Assuming JSON file structure like {"default": {"x": 10, "y": 10}}
         boardWidth = Integer.parseInt(JsonFile.read("painter.json", "default", "x"));
         boardHeight = Integer.parseInt(JsonFile.read("painter.json", "default", "y"));
+        boardWidth *= scale;
+        boardHeight *= scale;
     }
 
     private void initializeTileImages() {
         try {
             InputStream defaultImageStream = getClass().getResourceAsStream("/assets/images/tile.png");
-            InputStream coneImageStream = getClass().getResourceAsStream("/assets/images/cone.png");
 
-            if (defaultImageStream != null && coneImageStream != null) {
+            if (defaultImageStream != null) {
                 tileImages.put("default", ImageIO.read(defaultImageStream));
-                tileImages.put("corner", ImageIO.read(coneImageStream));
             } else {
                 System.err.println("Error loading image resources.");
             }
@@ -90,10 +91,11 @@ public class Painter extends JFrame {
     }
 
     private void setInitialPosition(int initialX, int initialY, String initialDirection) {
-        playerX = Math.max(padding, Math.min(initialX + padding, boardWidth + padding - 1));
-        playerY = Math.max(padding, Math.min(initialY + padding, boardHeight + padding - 1));
+        playerX = Math.max(padding, Math.min(initialX, boardWidth - 1 + padding));
+        playerY = Math.max(padding, Math.min(initialY, boardHeight - 1 + padding));
         facingDirection = initialDirection;
     }
+
     private void initializeTileSize() {
         // Retrieve the scale factor from the JSON file
         String scaleString = JsonFile.read("painter.json", "default", "scale");
@@ -102,14 +104,11 @@ public class Painter extends JFrame {
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        tileSize *= scale; // Scale the tile size
+        scaleFactor = scale; // Set scaleFactor to the retrieved scale
+        tileSize = (int) (scaleFactor * tileSize); // Scale the tile size
     }
-    private void setScale(double newScale) {
-        // Set the scale factor
-        scale = newScale;
-        tileSize *= scale; // Scale the tile size
-        repaint(); // Repaint the frame to apply the changes
-    }
+
+
     public void savePlayerPosition() {
         // Save player position to a temp file
         // Implement based on your requirements
@@ -117,13 +116,13 @@ public class Painter extends JFrame {
 
     public void move() {
         // Implement movement logic based on the facing direction
-        if ("north".equals(facingDirection) && playerY > padding) {
+        if ("north".equals(facingDirection) && playerY > 0) {
             playerY--;
-        } else if ("south".equals(facingDirection) && playerY < boardHeight + padding - 1) {
+        } else if ("south".equals(facingDirection) && playerY < boardHeight - 1) {
             playerY++;
-        } else if ("west".equals(facingDirection) && playerX > padding) {
+        } else if ("west".equals(facingDirection) && playerX > 0) {
             playerX--;
-        } else if ("east".equals(facingDirection) && playerX < boardWidth + padding - 1) {
+        } else if ("east".equals(facingDirection) && playerX < boardWidth - 1) {
             playerX++;
         }
 
@@ -165,7 +164,7 @@ public class Painter extends JFrame {
 
     public void paint(Color color) {
         // Paint the tile below the player with the specified color
-        String tileKey = (playerX - padding) + "," + (playerY - padding);
+        String tileKey = playerX + "," + playerY;
         if (!paintedTiles.containsKey(tileKey)) {
             paintedTiles.put(tileKey, color);
             repaint();
@@ -192,10 +191,10 @@ public class Painter extends JFrame {
         int scaledTileSize = (int) (scaleFactor * tileSize);
 
         // Draw the board with tiles, painted tiles, and player on the offscreen image
-        for (int y = 0; y < boardHeight + 2 * padding; y++) {
-            for (int x = 0; x < boardWidth + 2 * padding; x++) {
-                int xPos = (int) (x * scaledTileSize);
-                int yPos = (int) (y * scaledTileSize);
+        for (int y = 0; y < boardHeight; y++) {
+            for (int x = 0; x < boardWidth; x++) {
+                int xPos = x * scaledTileSize;
+                int yPos = y * scaledTileSize;
 
                 // Draw the tile
                 if (tileImages.containsKey("default")) {
@@ -203,7 +202,7 @@ public class Painter extends JFrame {
                 }
 
                 // Draw the painted tile
-                String tileKey = (x - padding) + "," + (y - padding);
+                String tileKey = x + "," + y;
                 if (paintedTiles.containsKey(tileKey)) {
                     bufferGraphics.setColor(paintedTiles.get(tileKey));
                     bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);

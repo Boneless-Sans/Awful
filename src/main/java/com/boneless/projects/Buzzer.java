@@ -30,6 +30,9 @@ public class Buzzer extends JFrame {
             AudioPlayer.play("incorrect.wav");
         });
 
+        correct.setFocusable(false);
+        incorrect.setFocusable(false);
+
         add(correct);
         add(incorrect);
         //add(both);

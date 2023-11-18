@@ -8,7 +8,7 @@ public class AudioPlayer {
     // Remove the 'player' instance and make the play method static.
     public static void play(String fileName) {
         // Add "src/resource/assets" before the file name.
-        String fullPath = "src/resource/assets/" + fileName;
+        String fullPath = "src/main/resources/assets/" + fileName;
 
         try {
             Clip clip = AudioSystem.getClip();
