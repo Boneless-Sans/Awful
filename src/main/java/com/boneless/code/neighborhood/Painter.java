@@ -2,8 +2,6 @@ package com.boneless.code.neighborhood;
 
 import com.boneless.projects.utils.JsonFile;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -13,6 +11,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+
+class ColorGrid {
+    private Map<String, Color> tileColors = new HashMap<>();
+
+    public Color getColor(int x, int y) {
+        return tileColors.getOrDefault(getKey(x, y), Color.WHITE);
+    }
+
+    public void setColor(int x, int y, Color color) {
+        tileColors.put(getKey(x, y), color);
+    }
+
+    private String getKey(int x, int y) {
+        return x + "," + y;
+    }
+}
+
 public class Painter extends JFrame {
 
     private int tileSize = 50; // Size of each tile
@@ -20,10 +37,10 @@ public class Painter extends JFrame {
     private int playerX, playerY;
     private int padding = 1; // Number of tiles for padding
 
-    private double scale = Double.parseDouble(JsonFile.read("painter.json", "default", "scale"));
+    private double scale = 1.0;
     private String facingDirection = "east"; // Initial direction (east)
     private Map<String, Image> tileImages = new HashMap<>();
-    private Map<String, Color> paintedTiles = new HashMap<>();
+    private ColorGrid colorGrid = new ColorGrid();
     private BufferedImage painterImage;
 
     private double scaleFactor = 1.5; // Default scaling factor
@@ -51,7 +68,6 @@ public class Painter extends JFrame {
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        // setResizable(false);
 
         setInitialPosition(initialX, initialY, initialDirection);
 
@@ -70,10 +86,11 @@ public class Painter extends JFrame {
 
     private void initializeTileImages() {
         try {
-            InputStream defaultImageStream = getClass().getResourceAsStream("/assets/images/tile.png");
+            InputStream defaultImageStream = getClass().getResourceAsStream("assets/images/tile.png");
 
             if (defaultImageStream != null) {
-                tileImages.put("default", ImageIO.read(defaultImageStream));
+                ImageIcon icon = new ImageIcon(defaultImageStream.readAllBytes());
+                tileImages.put("default", icon.getImage());
             } else {
                 System.err.println("Error loading image resources.");
             }
@@ -97,17 +114,15 @@ public class Painter extends JFrame {
     }
 
     private void initializeTileSize() {
-        // Retrieve the scale factor from the JSON file
         String scaleString = JsonFile.read("painter.json", "default", "scale");
         try {
             scale = Double.parseDouble(scaleString);
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        scaleFactor = scale; // Set scaleFactor to the retrieved scale
-        tileSize = (int) (scaleFactor * tileSize); // Scale the tile size
+        scaleFactor = scale;
+        tileSize = (int) (scaleFactor * tileSize);
     }
-
 
     public void savePlayerPosition() {
         // Save player position to a temp file
@@ -115,7 +130,6 @@ public class Painter extends JFrame {
     }
 
     public void move() {
-        // Implement movement logic based on the facing direction
         if ("north".equals(facingDirection) && playerY > 0) {
             playerY--;
         } else if ("south".equals(facingDirection) && playerY < boardHeight - 1) {
@@ -131,8 +145,6 @@ public class Painter extends JFrame {
     }
 
     public void turnLeft() {
-        // Implement logic to turn left
-        // Update the facingDirection accordingly
         if ("north".equals(facingDirection)) {
             facingDirection = "west";
         } else if ("west".equals(facingDirection)) {
@@ -147,8 +159,6 @@ public class Painter extends JFrame {
     }
 
     public void turnRight() {
-        // Implement logic to turn right
-        // Update the facingDirection accordingly
         if ("north".equals(facingDirection)) {
             facingDirection = "east";
         } else if ("east".equals(facingDirection)) {
@@ -163,12 +173,8 @@ public class Painter extends JFrame {
     }
 
     public void paint(Color color) {
-        // Paint the tile below the player with the specified color
-        String tileKey = playerX + "," + playerY;
-        if (!paintedTiles.containsKey(tileKey)) {
-            paintedTiles.put(tileKey, color);
-            repaint();
-        }
+        colorGrid.setColor(playerX, playerY, color);
+        repaint();
     }
 
     public String getFacingDirection() {
@@ -177,38 +183,30 @@ public class Painter extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        // Draw to the offscreen image first
         Graphics bufferGraphics = buffer.getGraphics();
         bufferGraphics.setColor(getBackground());
         bufferGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        // Set rendering hints for better quality
         ((Graphics2D) bufferGraphics).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         ((Graphics2D) bufferGraphics).setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         ((Graphics2D) bufferGraphics).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Calculate scaled tile size
         int scaledTileSize = (int) (scaleFactor * tileSize);
 
-        // Draw the board with tiles, painted tiles, and player on the offscreen image
         for (int y = 0; y < boardHeight; y++) {
             for (int x = 0; x < boardWidth; x++) {
                 int xPos = x * scaledTileSize;
                 int yPos = y * scaledTileSize;
 
-                // Draw the tile
-                if (tileImages.containsKey("default")) {
-                    bufferGraphics.drawImage(tileImages.get("default"), xPos, yPos, scaledTileSize, scaledTileSize, null);
+                Image tileImage = tileImages.get("default");
+                if (tileImage != null) {
+                    bufferGraphics.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
                 }
 
-                // Draw the painted tile
-                String tileKey = x + "," + y;
-                if (paintedTiles.containsKey(tileKey)) {
-                    bufferGraphics.setColor(paintedTiles.get(tileKey));
-                    bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
-                }
+                Color tileColor = colorGrid.getColor(x, y);
+                bufferGraphics.setColor(tileColor);
+                bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
 
-                // Draw the painter image with rotation
                 if (x == playerX && y == playerY) {
                     double rotationAngle = 0.0;
 
@@ -229,14 +227,28 @@ public class Painter extends JFrame {
             }
         }
 
-        // Copy the offscreen image to the screen
         g.drawImage(buffer, 0, getInsets().top, this);
+    }
+
+
+    private Image loadImage(String path) {
+        try {
+            InputStream imageStream = getClass().getResourceAsStream(path);
+            if (imageStream != null) {
+                return ImageIO.read(imageStream);
+            } else {
+                System.err.println("Error loading image from path: " + path);
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void drawRotatedImage(Graphics g, Image image, int x, int y, double angle) {
         Graphics2D g2d = (Graphics2D) g.create();
 
-        // Rotate the image around its center
         AffineTransform transform = new AffineTransform();
         transform.translate(x, y);
         transform.rotate(angle, image.getWidth(this) / 2.0, image.getHeight(this) / 2.0);
@@ -247,19 +259,12 @@ public class Painter extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            // Use the default constructor
             Painter painter = new Painter();
-
-            // Alternatively, use the parameterized constructor
-            // Painter painter = new Painter(2, 2, "DOWN", false);
-
-            // Example movements and painting
             painter.move();
             painter.turnLeft();
             painter.move();
-            painter.paint(Color.BLUE); // Paint the tile below the player in blue
+            painter.paint(Color.BLUE);
 
-            // Retrieve and print the facing direction
             System.out.println("Facing Direction: " + painter.getFacingDirection());
         });
     }

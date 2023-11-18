@@ -26,7 +26,8 @@ public class OptionsPane {
                 "*bruh*"
         };
         IconResize icon = new IconResize("src/resource/assets/main.png");
-        JOptionPane.showOptionDialog(null,
+        JOptionPane.showOptionDialog(
+                null,
                 "You are not fucking awesome",
                 "kys",
                 JOptionPane.YES_NO_OPTION,
