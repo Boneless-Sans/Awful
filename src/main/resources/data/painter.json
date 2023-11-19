@@ -5,15 +5,20 @@
     "scale": "1"
   },
   "data": {"save_color_option": "false"},
-  "colors": {
-    "red": "255,0,0",
-    "orange": "255,255,0",
-    "green": "0,255,0",
-    "gray": "128,128,128",
-    "blue": "0,0,255",
-    "white": "255,255,255",
-    "yellow": "255,0,0",
-    "black": "0,0,0",
-    "purple": "255,0,255"
-  }
+  "colors": [
+    "Color.red",
+    "Color.orange",
+    "Color.yellow",
+    "Color.green",
+    "Color.cyan",
+    "Color.blue",
+    "Color.pink",
+    "Color.magenta",
+    "new Color(255,0,0)",
+    "Color.white",
+    "Color.lightGray",
+    "Color.gray",
+    "Color.darkGray",
+    "Color.black"
+  ]
 }

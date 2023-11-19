@@ -15,14 +15,29 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 class ColorGrid {
-    private Map<String, Color> tileColors = new HashMap<>();
+    private Map<String, Color> backgroundColors = new HashMap<>();
+    private Map<String, Color> paintColors = new HashMap<>();
 
-    public Color getColor(int x, int y) {
-        return tileColors.getOrDefault(getKey(x, y), Color.WHITE);
+    public Color getBackgroundColor(int x, int y) {
+        String key = getKey(x, y);
+        Color color = backgroundColors.get(key);
+        return color != null ? color : Color.WHITE;
     }
 
-    public void setColor(int x, int y, Color color) {
-        tileColors.put(getKey(x, y), color);
+    public void setBackgroundColor(int x, int y, Color color) {
+        String key = getKey(x, y);
+        backgroundColors.put(key, color);
+    }
+
+    public Color getPaintColor(int x, int y) {
+        String key = getKey(x, y);
+        Color color = paintColors.get(key);
+        return color != null ? color : null;
+    }
+
+    public void setPaintColor(int x, int y, Color color) {
+        String key = getKey(x, y);
+        paintColors.put(key, color);
     }
 
     private String getKey(int x, int y) {
@@ -60,6 +75,7 @@ public class Painter extends JFrame {
         initializeTileSize();
 
         setTitle("Painter");
+        setBackground(Color.BLACK);
 
         int frameWidth = (int) (scaleFactor * tileSize * boardWidth);
         int frameHeight = (int) (scaleFactor * tileSize * boardHeight) + 35;
@@ -86,10 +102,10 @@ public class Painter extends JFrame {
 
     private void initializeTileImages() {
         try {
-            InputStream defaultImageStream = getClass().getResourceAsStream("assets/images/tile.png");
+            InputStream defaultImageStream = getClass().getResourceAsStream("/assets/images/tile.png");
 
             if (defaultImageStream != null) {
-                ImageIcon icon = new ImageIcon(defaultImageStream.readAllBytes());
+                ImageIcon icon = new ImageIcon(ImageIO.read(defaultImageStream));
                 tileImages.put("default", icon.getImage());
             } else {
                 System.err.println("Error loading image resources.");
@@ -124,11 +140,6 @@ public class Painter extends JFrame {
         tileSize = (int) (scaleFactor * tileSize);
     }
 
-    public void savePlayerPosition() {
-        // Save player position to a temp file
-        // Implement based on your requirements
-    }
-
     public void move() {
         if ("north".equals(facingDirection) && playerY > 0) {
             playerY--;
@@ -141,7 +152,6 @@ public class Painter extends JFrame {
         }
 
         repaint();
-        savePlayerPosition();
     }
 
     public void turnLeft() {
@@ -173,7 +183,10 @@ public class Painter extends JFrame {
     }
 
     public void paint(Color color) {
-        colorGrid.setColor(playerX, playerY, color);
+        // Set the paint color in the color grid
+        colorGrid.setPaintColor(playerX, playerY, color);
+
+        // Repaint the component to update the display
         repaint();
     }
 
@@ -183,30 +196,47 @@ public class Painter extends JFrame {
 
     @Override
     public void paint(Graphics g) {
+        super.paint(g); // Call super.paint to ensure proper painting
+
+        // Create the first buffer and set rendering hints
+        BufferedImage buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics bufferGraphics = buffer.getGraphics();
         bufferGraphics.setColor(getBackground());
         bufferGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        ((Graphics2D) bufferGraphics).setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        ((Graphics2D) bufferGraphics).setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        ((Graphics2D) bufferGraphics).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        // Create the second buffer for triple buffering
+        BufferedImage buffer2 = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics bufferGraphics2 = buffer2.getGraphics();
+        bufferGraphics2.setColor(getBackground());
+        bufferGraphics2.fillRect(0, 0, getWidth(), getHeight());
 
         int scaledTileSize = (int) (scaleFactor * tileSize);
 
         for (int y = 0; y < boardHeight; y++) {
             for (int x = 0; x < boardWidth; x++) {
-                int xPos = x * scaledTileSize;
-                int yPos = y * scaledTileSize;
+                int xPos = (int) (x * scaledTileSize * scaleFactor);  // Adjusted calculation
+                int yPos = (int) (y * scaledTileSize * scaleFactor);  // Adjusted calculation
 
-                Image tileImage = tileImages.get("default");
+                String tileType = getTileType(x, y);
+                Image tileImage = tileImages.get(tileType);
+
+                // Draw background to the first buffer
                 if (tileImage != null) {
                     bufferGraphics.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
+                } else {
+                    Color tileBackgroundColor = colorGrid.getBackgroundColor(x, y);
+                    bufferGraphics.setColor(tileBackgroundColor);
+                    bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
                 }
 
-                Color tileColor = colorGrid.getColor(x, y);
-                bufferGraphics.setColor(tileColor);
-                bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                // Draw paint layer to the first buffer
+                Color paintColor = colorGrid.getPaintColor(x, y);
+                if (paintColor != null) {
+                    bufferGraphics.setColor(paintColor);
+                    bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                }
 
+                // Draw player to the first buffer
                 if (x == playerX && y == playerY) {
                     double rotationAngle = 0.0;
 
@@ -227,45 +257,30 @@ public class Painter extends JFrame {
             }
         }
 
-        g.drawImage(buffer, 0, getInsets().top, this);
+        // Draw the first buffer to the second buffer for triple buffering
+        bufferGraphics2.drawImage(buffer, 0, 0, this);
+
+        // Draw the second buffer to the screen
+        g.drawImage(buffer2, 0, getInsets().top, this);
+
+        // Dispose of the graphics contexts
+        bufferGraphics.dispose();
+        bufferGraphics2.dispose();
     }
 
 
-    private Image loadImage(String path) {
-        try {
-            InputStream imageStream = getClass().getResourceAsStream(path);
-            if (imageStream != null) {
-                return ImageIO.read(imageStream);
-            } else {
-                System.err.println("Error loading image from path: " + path);
-                return null;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+
+    private String getTileType(int x, int y) {
+        // Your logic to determine the type of tile at position (x, y)
+        // Return the type as a string
+        return "default"; // Change this based on your logic
     }
 
     private void drawRotatedImage(Graphics g, Image image, int x, int y, double angle) {
         Graphics2D g2d = (Graphics2D) g.create();
-
-        AffineTransform transform = new AffineTransform();
-        transform.translate(x, y);
-        transform.rotate(angle, image.getWidth(this) / 2.0, image.getHeight(this) / 2.0);
-
-        g2d.drawImage(image, transform, this);
+        g2d.translate(x + image.getWidth(null) / 2, y + image.getHeight(null) / 2);
+        g2d.rotate(angle);
+        g2d.drawImage(image, -image.getWidth(null) / 2, -image.getHeight(null) / 2, null);
         g2d.dispose();
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Painter painter = new Painter();
-            painter.move();
-            painter.turnLeft();
-            painter.move();
-            painter.paint(Color.BLUE);
-
-            System.out.println("Facing Direction: " + painter.getFacingDirection());
-        });
     }
 }

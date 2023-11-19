@@ -18,11 +18,7 @@ public class PainterPlus extends Painter implements KeyListener {
     private static boolean toggle = true;
     private final int originalHeight = getHeight();
     private final int originalWidth = getWidth();
-    private static final Color[] COLORS = {
-            Color.red, Color.orange, Color.yellow, Color.green, Color.cyan, Color.blue,
-            Color.pink, Color.magenta, new Color(139, 69, 19),
-            Color.white, Color.lightGray, Color.gray, Color.darkGray, Color.black
-    };
+    private static final Color[] COLORS = JsonFile.readColorArray("painter.json", "colors");
     public PainterPlus(){
         addKeyListener(this);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
