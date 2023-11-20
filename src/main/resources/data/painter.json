@@ -4,7 +4,7 @@
     "y": "10",
     "scale": "1"
   },
-  "data": {"save_color_option": "false"},
+  "data": {"save_color_option": "true"},
   "colors": [
     "Color.red",
     "Color.orange",
@@ -14,11 +14,10 @@
     "Color.blue",
     "Color.pink",
     "Color.magenta",
-    "new Color(255,0,0)",
+    "new Color( 139,69,19)",
     "Color.white",
-    "Color.lightGray",
+    "new Color( 200,200,200)",
     "Color.gray",
-    "Color.darkGray",
-    "Color.black"
+    "new Color( 0,0,0)"
   ]
 }

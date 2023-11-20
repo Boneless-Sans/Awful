@@ -40,12 +40,16 @@ public class PainterPlus extends Painter implements KeyListener {
         public ColorPickerFrame(String title) {
             super(title);
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            setSize(500,500);
+            setSize(500,400);
             setLayout(new BorderLayout());
             ImageIcon icon = new ImageIcon("src/main/resources/assets/images/colors.png");
             setIconImage(icon.getImage());
 
-            JPanel panel = new JPanel(new GridLayout(2, 6, 5, 5));
+            String[] count = JsonFile.readArray("painter.json", "colors");
+            int totalCells = count.length;
+            int[] dimensions = findDimensions(totalCells);
+
+            JPanel panel = new JPanel(new GridLayout(dimensions[1], dimensions[0], 5, 5));
             for (Color color : COLORS) {
                 JButton colorButton = new JButton();
                 colorButton.setBackground(color);
@@ -80,6 +84,9 @@ public class PainterPlus extends Painter implements KeyListener {
 
             NormalButtons.set();
             JButton submitButton = new JButton("Use");
+            submitButton.addActionListener(e -> {
+                selectedColor = new Color(Integer.parseInt(red.getText()), Integer.parseInt(green.getText()),Integer.parseInt(blue.getText()));
+            });
             submitButton.setFocusable(false);
 
             String[] buttons = {
@@ -90,27 +97,27 @@ public class PainterPlus extends Painter implements KeyListener {
             JButton saveButton = new JButton("Save");
             saveButton.setFocusable(false);
             saveButton.addActionListener(e -> {
-                int input = JOptionPane.showOptionDialog(
-                    null,
-                    "Program Restart Required to Use New Color",
-                    "Restart to Use New Color",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE,
-                    new ImageIcon("src/main/resource/assets/images/question_mark.png"),
-                    buttons,
-                    0
-                );
-                switch(input){
-                    case 0:
-                        System.exit(0);
-                        break;
-                    case 1:
-                        System.out.println("exited");
-                        break;
-                    case 2:
-                        JsonFile.writeln("painter.json", "data", "save_color_option","false");
-                        break;
+                if(!Boolean.parseBoolean(JsonFile.read("painter.json", "data", "save_color_option"))) {
+                    int input = JOptionPane.showOptionDialog(
+                            null,
+                            "Program Restart Required to Use New Color",
+                            "Restart to Use New Color",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE,
+                            new ImageIcon("src/main/resource/assets/images/question_mark.png"),
+                            buttons,
+                            0
+                    );
+                    switch (input) {
+                        case 0:
+                            System.exit(0);
+                            break;
+                        case 2:
+                            JsonFile.writeln("painter.json", "data", "save_color_option", "true");
+                            break;
+                    }
                 }
+                JsonFile.writeToArray("painter.json","colors", "new Color( " + red.getText() + "," + blue.getText() + "," + green.getText() + ")");
             });
 
             RGBPanel.add(infoText);
@@ -121,9 +128,7 @@ public class PainterPlus extends Painter implements KeyListener {
             RGBPanel.add(blue);
 
             RGBPanel.add(submitButton);
-            if(!Boolean.parseBoolean(JsonFile.read("painter.json", "data", "save_color_option"))){
-                RGBPanel.add(saveButton);
-            }
+            RGBPanel.add(saveButton);
 
             add(panel, BorderLayout.CENTER);
             add(RGBPanel, BorderLayout.SOUTH);
@@ -139,6 +144,22 @@ public class PainterPlus extends Painter implements KeyListener {
             });
             setVisible(true);
         }
+    }
+    public static int[] findDimensions(int N) {
+        int[] result = new int[2];
+
+        // Start with a square grid and adjust
+        int sqrtN = (int) Math.ceil(Math.sqrt(N));
+
+        for (int i = sqrtN; i <= N; i++) {
+            if (N % i == 0) {
+                result[0] = i;
+                result[1] = N / i;
+                break;
+            }
+        }
+
+        return result;
     }
 
     @Override

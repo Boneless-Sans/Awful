@@ -3,7 +3,10 @@ package com.boneless.code.neighborhood;
 import com.boneless.projects.utils.JsonFile;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,13 +65,9 @@ public class Painter extends JFrame {
     private BufferedImage buffer; // Offscreen image for double buffering
 
     private final int scaledTileSize = (int) (scaleFactor * tileSize);
+    private BufferStrategy bufferStrategy;
 
     public Painter() {
-        this(0, 0, "east"); // Call the parameterized constructor with default values and use tile gaps
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-    }
-
-    public Painter(int initialX, int initialY, String initialDirection) {
         initializeBoardSize();
         initializeTileImages();
         initializePainterImage();
@@ -85,13 +84,32 @@ public class Painter extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        setInitialPosition(initialX, initialY, initialDirection);
+        setInitialPosition(0, 0, "east");
 
-        buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+        // Set up a timer to periodically update the frame
+        int delay = 100; // delay in milliseconds
+        ActionListener taskPerformer = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                //move(); // Update the frame at each timer tick
+                //repaint(); // Ensure the frame gets repainted after the move
+            }
+        };
+        Timer timer = new Timer(delay, taskPerformer);
+        timer.start();
 
-        setVisible(true);
+        setVisible(true); // Make the frame visible after setting it up
     }
+    private void render() {
+        do {
+            do {
+                Graphics2D g = (Graphics2D) bufferStrategy.getDrawGraphics();
+                paint(g);
+                g.dispose();
+            } while (bufferStrategy.contentsRestored());
 
+            bufferStrategy.show();
+        } while (bufferStrategy.contentsLost());
+    }
     private void initializeBoardSize() {
         // Assuming JSON file structure like {"default": {"x": 10, "y": 10}}
         boardWidth = Integer.parseInt(JsonFile.read("painter.json", "default", "x"));
@@ -196,80 +214,93 @@ public class Painter extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g); // Call super.paint to ensure proper painting
-
-        // Create the first buffer and set rendering hints
-        BufferedImage buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics bufferGraphics = buffer.getGraphics();
-        bufferGraphics.setColor(getBackground());
-        bufferGraphics.fillRect(0, 0, getWidth(), getHeight());
-
-        // Create the second buffer for triple buffering
-        BufferedImage buffer2 = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics bufferGraphics2 = buffer2.getGraphics();
-        bufferGraphics2.setColor(getBackground());
-        bufferGraphics2.fillRect(0, 0, getWidth(), getHeight());
-
-        int scaledTileSize = (int) (scaleFactor * tileSize);
-
-        for (int y = 0; y < boardHeight; y++) {
-            for (int x = 0; x < boardWidth; x++) {
-                int xPos = (int) (x * scaledTileSize * scaleFactor);  // Adjusted calculation
-                int yPos = (int) (y * scaledTileSize * scaleFactor);  // Adjusted calculation
-
-                String tileType = getTileType(x, y);
-                Image tileImage = tileImages.get(tileType);
-
-                // Draw background to the first buffer
-                if (tileImage != null) {
-                    bufferGraphics.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
-                } else {
-                    Color tileBackgroundColor = colorGrid.getBackgroundColor(x, y);
-                    bufferGraphics.setColor(tileBackgroundColor);
-                    bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
-                }
-
-                // Draw paint layer to the first buffer
-                Color paintColor = colorGrid.getPaintColor(x, y);
-                if (paintColor != null) {
-                    bufferGraphics.setColor(paintColor);
-                    bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
-                }
-
-                // Draw player to the first buffer
-                if (x == playerX && y == playerY) {
-                    double rotationAngle = 0.0;
-
-                    if ("north".equals(facingDirection)) {
-                        rotationAngle = Math.PI;
-                    } else if ("south".equals(facingDirection)) {
-                        rotationAngle = 0.0;
-                    } else if ("west".equals(facingDirection)) {
-                        rotationAngle = Math.PI / 2;
-                    } else if ("east".equals(facingDirection)) {
-                        rotationAngle = -Math.PI / 2;
-                    }
-
-                    int imageX = xPos + scaledTileSize / 2 - painterImage.getWidth() / 2;
-                    int imageY = yPos + scaledTileSize / 2 - painterImage.getHeight() / 2;
-                    drawRotatedImage(bufferGraphics, painterImage, imageX, imageY, rotationAngle);
-                }
-            }
+        // Create the buffer strategy after the frame is visible
+        if (bufferStrategy == null) {
+            createBufferStrategy(2); // Using double buffering
+            bufferStrategy = getBufferStrategy();
         }
 
-        // Draw the first buffer to the second buffer for triple buffering
-        bufferGraphics2.drawImage(buffer, 0, 0, this);
+        // Rendering using BufferStrategy
+        do {
+            do {
+                Graphics2D g2d = (Graphics2D) bufferStrategy.getDrawGraphics();
+                super.paint(g2d); // Call the super.paint to ensure proper painting
 
-        // Draw the second buffer to the screen
-        g.drawImage(buffer2, 0, getInsets().top, this);
+                // Create the first buffer and set rendering hints
+                BufferedImage buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics bufferGraphics = buffer.getGraphics();
+                bufferGraphics.setColor(getBackground());
+                bufferGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        // Dispose of the graphics contexts
-        bufferGraphics.dispose();
-        bufferGraphics2.dispose();
+                // Create the second buffer for triple buffering
+                BufferedImage buffer2 = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics bufferGraphics2 = buffer2.getGraphics();
+                bufferGraphics2.setColor(getBackground());
+                bufferGraphics2.fillRect(0, 0, getWidth(), getHeight());
+
+                int scaledTileSize = (int) (scaleFactor * tileSize);
+
+                for (int y = 0; y < boardHeight; y++) {
+                    for (int x = 0; x < boardWidth; x++) {
+                        int xPos = (int) (x * scaledTileSize * scaleFactor);  // Adjusted calculation
+                        int yPos = (int) (y * scaledTileSize * scaleFactor);  // Adjusted calculation
+
+                        String tileType = getTileType(x, y);
+                        Image tileImage = tileImages.get(tileType);
+
+                        // Draw background to the first buffer
+                        if (tileImage != null) {
+                            bufferGraphics.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
+                        } else {
+                            Color tileBackgroundColor = colorGrid.getBackgroundColor(x, y);
+                            bufferGraphics.setColor(tileBackgroundColor);
+                            bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                        }
+
+                        // Draw paint layer to the first buffer
+                        Color paintColor = colorGrid.getPaintColor(x, y);
+                        if (paintColor != null) {
+                            bufferGraphics.setColor(paintColor);
+                            bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                        }
+
+                        // Draw player to the first buffer
+                        if (x == playerX && y == playerY) {
+                            double rotationAngle = 0.0;
+
+                            if ("north".equals(facingDirection)) {
+                                rotationAngle = Math.PI;
+                            } else if ("south".equals(facingDirection)) {
+                                rotationAngle = 0.0;
+                            } else if ("west".equals(facingDirection)) {
+                                rotationAngle = Math.PI / 2;
+                            } else if ("east".equals(facingDirection)) {
+                                rotationAngle = -Math.PI / 2;
+                            }
+
+                            int imageX = xPos + scaledTileSize / 2 - painterImage.getWidth() / 2;
+                            int imageY = yPos + scaledTileSize / 2 - painterImage.getHeight() / 2;
+                            drawRotatedImage(bufferGraphics, painterImage, imageX, imageY, rotationAngle);
+                        }
+                    }
+                }
+
+                // Draw the first buffer to the second buffer for triple buffering
+                bufferGraphics2.drawImage(buffer, 0, 0, this);
+
+                // Draw the second buffer to the screen
+                g2d.drawImage(buffer2, 0, getInsets().top, this);
+
+                // Dispose of the graphics contexts
+                bufferGraphics.dispose();
+                bufferGraphics2.dispose();
+
+                g2d.dispose();
+            } while (bufferStrategy.contentsRestored());
+
+            bufferStrategy.show();
+        } while (bufferStrategy.contentsLost());
     }
-
-
-
     private String getTileType(int x, int y) {
         // Your logic to determine the type of tile at position (x, y)
         // Return the type as a string
