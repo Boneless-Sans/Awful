@@ -44,7 +44,7 @@ public class TextInput extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==button){
-            System.out.println("Fuck off " + textField.getText());
+            System.out.println("Hello, " + textField.getText());
             FileReaderSaver.save(textField.getText(), "src/resource/data/text_field");
             file.setText(textField.getText());
         }

@@ -20,9 +20,5 @@ public class FoodTruckRunner {
         } else {
             System.out.println("The Cookie is not Chewy");
         }
-
-        // Create an instance of FileReaderSaver and use it to save and read files
-        //FileReaderSaver.save("this is fucking awful text ON GOD", "src/resource/data/output.txt");
-        //System.out.println(FileReaderSaver.read("src/resource/data/output.txt"));
     }
 }

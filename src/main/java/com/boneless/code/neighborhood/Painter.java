@@ -1,11 +1,10 @@
 package com.boneless.code.neighborhood;
 
 import com.boneless.projects.utils.JsonFile;
+import com.boneless.projects.utils.NormalButtons;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.AffineTransform;
+import java.awt.event.*;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -16,6 +15,8 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 class ColorGrid {
     private Map<String, Color> backgroundColors = new HashMap<>();
@@ -53,6 +54,7 @@ public class Painter extends JFrame {
     private int tileSize = 50; // Size of each tile
     private int boardWidth, boardHeight;
     private int playerX, playerY;
+    private int paintCount;
     private int padding = 1; // Number of tiles for padding
 
     private double scale = 1.0;
@@ -68,6 +70,20 @@ public class Painter extends JFrame {
     private BufferStrategy bufferStrategy;
 
     public Painter() {
+        init(0,0,"east");
+    }
+    public Painter(int xCord, int yCord, String facing){
+        init(xCord, yCord, facing);
+    }
+    public Painter(boolean doPlus){
+        new PainterListener();
+        dispose();
+    }
+    public Painter(boolean doPlus, int xCord, int yCord, String facingDirection){
+        new PainterListener(xCord, yCord, facingDirection);
+        dispose();
+    }
+    private void init(int x, int y, String facingDirection){
         initializeBoardSize();
         initializeTileImages();
         initializePainterImage();
@@ -84,7 +100,7 @@ public class Painter extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        setInitialPosition(0, 0, "east");
+        setInitialPosition(x, y, facingDirection);
 
         // Set up a timer to periodically update the frame
         int delay = 100; // delay in milliseconds
@@ -142,8 +158,8 @@ public class Painter extends JFrame {
     }
 
     private void setInitialPosition(int initialX, int initialY, String initialDirection) {
-        playerX = Math.max(padding, Math.min(initialX, boardWidth - 1 + padding));
-        playerY = Math.max(padding, Math.min(initialY, boardHeight - 1 + padding));
+        playerX = Math.max(0, Math.min(initialX, boardWidth - 1));
+        playerY = Math.max(0, Math.min(initialY, boardHeight - 1));
         facingDirection = initialDirection;
     }
 
@@ -171,7 +187,80 @@ public class Painter extends JFrame {
 
         repaint();
     }
+    public boolean canMove() {
+        int nextX = playerX;
+        int nextY = playerY;
 
+        // Calculate the next position based on the facing direction
+        if ("north".equals(facingDirection)) {
+            nextY--;
+        } else if ("south".equals(facingDirection)) {
+            nextY++;
+        } else if ("west".equals(facingDirection)) {
+            nextX--;
+        } else if ("east".equals(facingDirection)) {
+            nextX++;
+        }
+
+        // Check if the next position is within the bounds of the board
+        return nextX >= 0 && nextX < boardWidth && nextY >= 0 && nextY < boardHeight;
+    }
+
+    public boolean canMove(String direction) {
+        int nextX = playerX;
+        int nextY = playerY;
+
+        // Calculate the next position based on the provided direction
+        if ("north".equals(direction)) {
+            nextY--;
+        } else if ("south".equals(direction)) {
+            nextY++;
+        } else if ("west".equals(direction)) {
+            nextX--;
+        } else if ("east".equals(direction)) {
+            nextX++;
+        }
+
+        // Check if the next position is within the bounds of the board
+        return nextX >= 0 && nextX < boardWidth && nextY >= 0 && nextY < boardHeight;
+    }
+    public int getX(){
+        return playerX + 1;
+    }
+    public int getY(){
+        return playerY + 1;
+    }
+    public boolean isFacingNorth() {
+        return "north".equals(facingDirection);
+    }
+
+    public boolean isFacingSouth() {
+        return "south".equals(facingDirection);
+    }
+
+    public boolean isFacingWest() {
+        return "west".equals(facingDirection);
+    }
+
+    public boolean isFacingEast() {
+        return "east".equals(facingDirection);
+    }
+    public boolean isOnBucket(){
+        return false;
+    }
+    public boolean isOnPaint(){
+        return true;
+    }
+    public boolean hasPaint(){
+        if(paintCount > 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public void takePaint(){
+        //
+    }
     public void turnLeft() {
         if ("north".equals(facingDirection)) {
             facingDirection = "west";
@@ -313,5 +402,381 @@ public class Painter extends JFrame {
         g2d.rotate(angle);
         g2d.drawImage(image, -image.getWidth(null) / 2, -image.getHeight(null) / 2, null);
         g2d.dispose();
+    }
+
+    public int getBoardWidth(){
+        return boardWidth;
+    }
+    public int getBoardHeight(){
+        return boardHeight;
+    }
+    public String toString(){
+        return "Spawn X: " + playerX;
+    }
+
+    //##PainterPlus
+    private class PainterListener extends Painter implements KeyListener {
+        private static Color selectedColor;
+        private static boolean toggle = true;
+        private final int originalHeight = getHeight();
+        private final int originalWidth = getWidth();
+        private static JPanel preview;
+        private static JTextField red;
+        private static JTextField green;
+        private static JTextField blue;
+        private Painter painter;
+        private static final Color[] defaultColors = {
+                Color.red,
+                Color.orange,
+                Color.yellow,
+                Color.green,
+                Color.cyan,
+                Color.blue,
+                new Color(255, 105, 180),
+                new Color(150,0,255),
+                new Color(139, 69, 19),
+                Color.white,
+                new Color(200, 200, 200),
+                Color.gray,
+                new Color(69, 69, 69),
+                Color.black
+        };
+        private static final Color[] COLORS = JsonFile.readColorArray("painter.json", "colors");
+
+        public PainterListener() {
+            this(0,0,"east");
+        }
+
+        public PainterListener(int xCord, int yCord, String facing) {
+            addKeyListener(this);
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            ImageIcon icon = new ImageIcon("src/main/resources/assets/images/painter.png");
+            setIconImage(icon.getImage());
+
+            JButton button = new JButton();
+            button.addActionListener(e -> {
+                colorPickerUI();
+            });
+            colorPickerUI();
+        }
+
+        private void colorPickerUI() {
+            ColorPickerFrame frame = new ColorPickerFrame("Color Picker");
+        }
+
+        private static class ColorPickerFrame extends JFrame {
+            private boolean showCustom = true;
+
+            public ColorPickerFrame(String title) {
+                super(title);
+
+                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                setSize(480, 250);
+                setLayout(new BorderLayout());
+                ImageIcon icon = new ImageIcon("src/main/resources/assets/images/colors.png");
+                setIconImage(icon.getImage());
+
+                if (COLORS.length == 0) {
+                    showCustom = false;
+                }
+
+                JPanel selectedColorPreview = new JPanel();
+                selectedColorPreview.setBackground(Color.BLACK);
+                selectedColorPreview.setPreferredSize(new Dimension(30, 30));
+
+                JPanel defaultPanel = new JPanel(new GridLayout(2, 8, 5, 5));
+                for (Color color : defaultColors) {
+                    JButton colorButton = new JButton();
+                    colorButton.setBackground(color);
+                    colorButton.setPreferredSize(new Dimension(60, 60));
+                    colorButton.addActionListener(e -> selectedColor = color);
+                    selectedColorPreview.setBackground(selectedColor);
+                    defaultPanel.add(colorButton);
+                }
+
+                JPanel savedColorsPanel = new JPanel(new GridLayout(2, 8, 5, 5));
+                // Adjust the preferred size of the savedColorsPanel if necessary
+                for (Color color : COLORS) {
+                    JButton savedColorButton = new JButton();
+                    savedColorButton.setBackground(color);
+                    savedColorButton.setPreferredSize(new Dimension(60, 60));
+                    savedColorButton.addActionListener(e -> selectedColor = color);
+                    selectedColorPreview.setBackground(selectedColor);
+                    savedColorsPanel.add(savedColorButton);
+                }
+
+                preview = new JPanel();
+                preview.setPreferredSize(new Dimension(30, 30));
+                preview.setBackground(Color.BLACK);
+
+                JPanel RGBPanel = new JPanel(new FlowLayout());
+                JLabel infoText = new JLabel("Custom RGB");
+                infoText.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                red = new JTextField();
+                green = new JTextField();
+                blue = new JTextField();
+
+                red.setPreferredSize(new Dimension(45, 30));
+                red.setFont(new Font("Arial", Font.ITALIC, 15));
+                red.setText("0");
+                red.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        char c = e.getKeyChar();
+                        if (Character.isDigit(c)) {
+                            super.keyTyped(e);
+                        } else {
+                            e.consume();
+                        }
+                    }
+                });
+                red.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+
+                });
+
+                green.setPreferredSize(new Dimension(45, 30));
+                green.setFont(new Font("Arial", Font.ITALIC, 15));
+                green.setText("0");
+                green.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+
+                });
+
+                blue.setPreferredSize(new Dimension(45, 30));
+                blue.setFont(new Font("Arial", Font.ITALIC, 15));
+                blue.setText("0");
+                blue.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+
+                });
+
+                JLabel comma = new JLabel(",");
+                comma.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                NormalButtons.set();
+                JButton submitButton = new JButton("Use");
+                submitButton.addActionListener(e -> {
+                    selectedColor = new Color(Integer.parseInt(red.getText()), Integer.parseInt(green.getText()), Integer.parseInt(blue.getText()));
+                });
+                submitButton.setFocusable(false);
+
+                String[] buttons = {
+                        "Restart",
+                        "Continue",
+                        "Don't Show Again"
+                };
+                JButton saveButton = new JButton("Save");
+                saveButton.setFocusable(false);
+                saveButton.addActionListener(e -> {
+                    if (!Boolean.parseBoolean(JsonFile.read("painter.json", "data", "save_color_option"))) {
+                        int input = JOptionPane.showOptionDialog(
+                                null,
+                                "Program Restart Required to Use New Color",
+                                "Restart to Use New Color",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE,
+                                new ImageIcon("src/main/resource/assets/images/question_mark.png"),
+                                buttons,
+                                0
+                        );
+                        switch (input) {
+                            case 0:
+                                System.exit(0);
+                                break;
+                            case 2:
+                                JsonFile.writeln("painter.json", "data", "save_color_option", "true");
+                                break;
+                        }
+                    }
+                    JsonFile.writeToArray("painter.json", "colors", "new Color( " + red.getText() + "," + blue.getText() + "," + green.getText() + ")");
+                });
+
+                RGBPanel.add(preview);
+                RGBPanel.add(infoText);
+
+                RGBPanel.add(red);
+                RGBPanel.add(new JLabel(","));
+                RGBPanel.add(green);
+                RGBPanel.add(new JLabel(","));
+                RGBPanel.add(blue);
+
+                RGBPanel.add(submitButton);
+                RGBPanel.add(saveButton);
+
+                RGBPanel.add(selectedColorPreview);
+
+                JLabel defaultColorsText = new JLabel("Default Colors");
+                defaultColorsText.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                JLabel savedColors = new JLabel("Saved Colors");
+                savedColors.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                JPanel globalPanel = new JPanel(new GridBagLayout());
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.gridx = 0;
+                gbc.gridy = 0;
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.weightx = 1.0;  // Allow horizontal expansion
+                globalPanel.add(defaultColorsText, gbc);
+
+                gbc.gridy = 1;
+                gbc.weighty = 1.0;  // Allow vertical expansion
+                gbc.anchor = GridBagConstraints.CENTER;
+                globalPanel.add(defaultPanel, gbc);
+
+                gbc.gridy = 2;
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.weighty = 0.0;  // Reset vertical expansion
+                if (showCustom) {
+                    globalPanel.add(savedColors, gbc);
+                }
+
+                gbc.gridy = 3;
+                gbc.weighty = 1.0;  // Allow vertical expansion
+                gbc.anchor = GridBagConstraints.CENTER;
+                if (showCustom) {
+                    globalPanel.add(savedColorsPanel, gbc);
+                    setSize(480, 400);
+                }
+
+                add(globalPanel, BorderLayout.CENTER);
+                add(RGBPanel, BorderLayout.SOUTH);
+
+                addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                        // Custom logic when the close button is clicked
+                        // Dispose the frame and set toggle to false
+                        dispose();
+                        toggle = false;
+                    }
+                });
+                setVisible(true);
+            }
+
+            private static void updatePreviewColor() {
+                if (!red.getText().isEmpty() && !green.getText().isEmpty() && !blue.getText().isEmpty() &&
+                        Integer.parseInt(red.getText()) <= 255 &&
+                        Integer.parseInt(green.getText()) <= 255 &&
+                        Integer.parseInt(blue.getText()) <= 255) {
+                    Color color = new Color(Integer.parseInt(red.getText()), Integer.parseInt(green.getText()), Integer.parseInt(blue.getText()));
+                    preview.setBackground(color);
+                } else {
+                    preview.setBackground(null);
+                }
+            }
+        }
+
+        public static int[] findDimensions(int N) {
+            int[] result = new int[2];
+
+            // Start with a square grid and adjust
+            int sqrtN = (int) Math.ceil(Math.sqrt(N));
+
+            for (int i = sqrtN; i <= N; i++) {
+                if (N % i == 0) {
+                    result[0] = i;
+                    result[1] = N / i;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            switch (e.getKeyChar()) {
+                case 'w':
+                    while (!Objects.equals(getFacingDirection(), "north")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 'd':
+                    while (!Objects.equals(getFacingDirection(), "east")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 's':
+                    while (!Objects.equals(getFacingDirection(), "south")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 'a':
+                    while (!Objects.equals(getFacingDirection(), "west")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 'e':
+                    turnRight();
+                    break;
+                case 'q':
+                    turnLeft();
+                    break;
+                case ' ':
+                    paint(selectedColor);
+                    break;
+            }
+            if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+                if (toggle) {
+                    System.exit(0);
+                }
+            }
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
+        }
     }
 }

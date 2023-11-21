@@ -1,23 +1,16 @@
 {
   "default": {
-    "x": "10",
-    "y": "10",
+    "x": "11",
+    "y": "11",
     "scale": "1"
   },
   "data": {"save_color_option": "true"},
   "colors": [
-    "Color.red",
-    "Color.orange",
-    "Color.yellow",
-    "Color.green",
-    "Color.cyan",
-    "Color.blue",
-    "Color.pink",
-    "Color.magenta",
-    "new Color( 139,69,19)",
-    "Color.white",
-    "new Color( 200,200,200)",
-    "Color.gray",
+    "new Color( 0,0,0)",
+    "new Color( 0,0,0)",
+    "new Color( 0,0,0)",
+    "new Color( 0,0,0)",
+    "new Color( 0,0,0)",
     "new Color( 0,0,0)"
   ]
 }

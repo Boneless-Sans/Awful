@@ -39,15 +39,15 @@ public class Fish {
 
                 switch (count) {
                     case 1:
-                        addLabelToFrame(frame, "No really, fuck off");
+                        addLabelToFrame(frame, "No");
                         count++;
                         break;
                     case 2:
-                        addLabelToFrame(frame, "No more fish for you.");
+                        addLabelToFrame(frame, "nuh uh");
                         count++;
                         break;
                     case 3:
-                        addLabelToFrame(frame, "you really cant win anymore");
+                        addLabelToFrame(frame, "stop");
                         count++;
                         break;
                     default:
@@ -139,7 +139,7 @@ public class Fish {
     }
 
     private static JFrame createFrame(ImageIcon icon) {
-        JFrame frame = new JFrame("Fuck off, no more");
+        JFrame frame = new JFrame("Nah");
         frame.setSize(300, 120);
         frame.setLayout(new FlowLayout());
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
