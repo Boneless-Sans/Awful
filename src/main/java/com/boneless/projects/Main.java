@@ -1,7 +1,5 @@
 package com.boneless.projects;
 
-import com.boneless.projects.utils.AssetLoader;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -26,7 +24,7 @@ public class Main {
             frame.setSize(400, 200);
             frame.setLayout(new FlowLayout());
 
-            InputStream assetStream = AssetLoader.loadAsset("src/resource/assets/check_mark.png");
+            //InputStream assetStream = AssetLoader.loadAsset("src/resource/assets/check_mark.png");
 
             ArrayList<String> applications = getAvailableApplications();
 

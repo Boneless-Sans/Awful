@@ -4,6 +4,6 @@ import com.boneless.code.neighborhood.Painter;
 
 public class NeighborhoodRunner {
     public static void main(String[] args){
-        Painter lisa = new Painter();
+        Painter lisa = new Painter(true);
     }
 }
