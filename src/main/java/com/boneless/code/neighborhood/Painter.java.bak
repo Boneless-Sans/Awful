@@ -1,0 +1,803 @@
+package com.boneless.code.neighborhood;
+
+import com.boneless.projects.utils.JsonFile;
+import com.boneless.projects.utils.NormalButtons;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+class ColorGrid {
+    private Map<String, Color> backgroundColors = new HashMap<>();
+    private Map<String, Color> paintColors = new HashMap<>();
+
+    public Color getBackgroundColor(int x, int y) {
+        String key = getKey(x, y);
+        Color color = backgroundColors.get(key);
+        return color != null ? color : Color.WHITE;
+    }
+
+    public void setBackgroundColor(int x, int y, Color color) {
+        String key = getKey(x, y);
+        backgroundColors.put(key, color);
+    }
+
+    public Color getPaintColor(int x, int y) {
+        String key = getKey(x, y);
+        Color color = paintColors.get(key);
+        return color != null ? color : null;
+    }
+
+    public void setPaintColor(int x, int y, Color color) {
+        String key = getKey(x, y);
+        paintColors.put(key, color);
+    }
+
+    private String getKey(int x, int y) {
+        return x + "," + y;
+    }
+}
+
+public class Painter extends JFrame {
+    private int tileSize = 50; // Size of each tile
+    private int boardWidth, boardHeight;
+    private int playerX, playerY;
+    private int paintCount;
+    private double scale = 1.0;
+    private String facingDirection = "east"; // Initial direction (east)
+    private Map<String, Image> tileImages = new HashMap<>();
+    private ColorGrid colorGrid = new ColorGrid();
+    private BufferedImage painterImage;
+    private double scaleFactor = 1.5; // Default scaling factor
+    private BufferStrategy bufferStrategy;
+
+    public Painter() {
+        init(0, 0, "east");
+    }
+
+    public Painter(int xCord, int yCord, String facing) {
+        init(xCord, yCord, facing);
+    }
+
+    public Painter(boolean doPlus) {
+        new PainterListener();
+        dispose();
+    }
+
+    public Painter(boolean doPlus, int xCord, int yCord, String facingDirection) {
+        new PainterListener(xCord, yCord, facingDirection);
+        dispose();
+    }
+
+    private void init(int x, int y, String facingDirection) {
+        initializeBoardSize();
+        initializeTileImages();
+        initializePainterImage();
+        initializeTileSize();
+
+        setTitle("Painter");
+        setBackground(Color.BLACK);
+
+        int frameWidth = (int) (scaleFactor * tileSize * boardWidth);
+        int frameHeight = (int) (scaleFactor * tileSize * boardHeight) + 35;
+
+        setSize(frameWidth, frameHeight);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        setInitialPosition(x, y, facingDirection);
+        setLayout(new BorderLayout());
+
+        // Set up a timer to periodically update the frame
+        int delay = 100; // delay in milliseconds
+        ActionListener taskPerformer = new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                //move(); // Update the frame at each timer tick
+                //repaint(); // Ensure the frame gets repainted after the move
+            }
+        };
+        Timer timer = new Timer(delay, taskPerformer);
+        timer.start();
+
+        setVisible(true); // Make the frame visible after setting it up
+    }
+    private void initializeBoardSize() {
+        // Assuming JSON file structure like {"default": {"x": 10, "y": 10}}
+        boardWidth = Integer.parseInt(JsonFile.read("painter.json", "default", "x"));
+        boardHeight = Integer.parseInt(JsonFile.read("painter.json", "default", "y"));
+        boardWidth *= scale;
+        boardHeight *= scale;
+    }
+
+    private void initializeTileImages() {
+        try {
+            InputStream defaultImageStream = getClass().getResourceAsStream("/assets/images/tile.png");
+
+            if (defaultImageStream != null) {
+                ImageIcon icon = new ImageIcon(ImageIO.read(defaultImageStream));
+                tileImages.put("default", icon.getImage());
+            } else {
+                System.err.println("Error loading image resources.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initializePainterImage() {
+        try {
+            painterImage = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/assets/images/painter.png")));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setInitialPosition(int initialX, int initialY, String initialDirection) {
+        playerX = Math.max(0, Math.min(initialX, boardWidth - 1));
+        playerY = Math.max(0, Math.min(initialY, boardHeight - 1));
+        facingDirection = initialDirection;
+    }
+
+    private void initializeTileSize() {
+        String scaleString = JsonFile.read("painter.json", "default", "scale");
+        try {
+            scale = Double.parseDouble(scaleString);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+        scaleFactor = scale;
+        tileSize = (int) (scaleFactor * tileSize);
+    }
+
+    public void move() {
+        if ("north".equals(facingDirection) && playerY > 0) {
+            playerY--;
+        } else if ("south".equals(facingDirection) && playerY < boardHeight - 1) {
+            playerY++;
+        } else if ("west".equals(facingDirection) && playerX > 0) {
+            playerX--;
+        } else if ("east".equals(facingDirection) && playerX < boardWidth - 1) {
+            playerX++;
+        }
+
+        repaint();
+    }
+
+    public boolean canMove() {
+        int nextX = playerX;
+        int nextY = playerY;
+
+        // Calculate the next position based on the facing direction
+        if ("north".equals(facingDirection)) {
+            nextY--;
+        } else if ("south".equals(facingDirection)) {
+            nextY++;
+        } else if ("west".equals(facingDirection)) {
+            nextX--;
+        } else if ("east".equals(facingDirection)) {
+            nextX++;
+        }
+
+        // Check if the next position is within the bounds of the board
+        return nextX >= 0 && nextX < boardWidth && nextY >= 0 && nextY < boardHeight;
+    }
+
+    public boolean canMove(String direction) {
+        int nextX = playerX;
+        int nextY = playerY;
+
+        // Calculate the next position based on the provided direction
+        if ("north".equals(direction)) {
+            nextY--;
+        } else if ("south".equals(direction)) {
+            nextY++;
+        } else if ("west".equals(direction)) {
+            nextX--;
+        } else if ("east".equals(direction)) {
+            nextX++;
+        }
+
+        // Check if the next position is within the bounds of the board
+        return nextX >= 0 && nextX < boardWidth && nextY >= 0 && nextY < boardHeight;
+    }
+
+    public int getX() {
+        return playerX - 1;
+    }
+
+    public int getY() {
+        return playerY - 1;
+    }
+
+    public boolean isFacingNorth() {
+        return "north".equals(facingDirection);
+    }
+
+    public boolean isFacingSouth() {
+        return "south".equals(facingDirection);
+    }
+
+    public boolean isFacingWest() {
+        return "west".equals(facingDirection);
+    }
+
+    public boolean isFacingEast() {
+        return "east".equals(facingDirection);
+    }
+
+    public boolean isOnBucket() {
+        return false;
+    }
+
+    public boolean isOnPaint() {
+        return true;
+    }
+
+    public boolean hasPaint() {
+        if (paintCount > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void takePaint() {
+        //
+    }
+
+    public void turnLeft() {
+        if ("north".equals(facingDirection)) {
+            facingDirection = "west";
+        } else if ("west".equals(facingDirection)) {
+            facingDirection = "south";
+        } else if ("south".equals(facingDirection)) {
+            facingDirection = "east";
+        } else if ("east".equals(facingDirection)) {
+            facingDirection = "north";
+        }
+
+        repaint();
+    }
+
+    public void turnRight() {
+        if ("north".equals(facingDirection)) {
+            facingDirection = "east";
+        } else if ("east".equals(facingDirection)) {
+            facingDirection = "south";
+        } else if ("south".equals(facingDirection)) {
+            facingDirection = "west";
+        } else if ("west".equals(facingDirection)) {
+            facingDirection = "north";
+        }
+
+        repaint();
+    }
+    private Color stringToColor(String color){
+        String initColor = JsonFile.read("colors.json", "colors", color);
+        String[] split = initColor.split(",");
+        int red = Integer.parseInt(split[0]);
+        int green = Integer.parseInt(split[1]);
+        int blue = Integer.parseInt(split[2]);
+        return new Color(red,green,blue);
+    }
+
+    public void paint(String color) {
+        // Set the paint color in the color grid
+        colorGrid.setPaintColor(playerX, playerY, stringToColor(color));
+
+        // Repaint the component to update the display
+        repaint();
+    }
+    public void paintOld(Color color) {
+        // Set the paint color in the color grid
+        colorGrid.setPaintColor(playerX, playerY, color);
+
+        // Repaint the component to update the display
+        repaint();
+    }
+
+    public String getFacingDirection() {
+        return facingDirection;
+    }
+
+    @Override
+    public void paint(Graphics g) {
+        // Create the buffer strategy after the frame is visible
+        if (bufferStrategy == null) {
+            createBufferStrategy(2); // Using double buffering
+            bufferStrategy = getBufferStrategy();
+        }
+
+        // Rendering using BufferStrategy
+        do {
+            do {
+                Graphics2D g2d = (Graphics2D) bufferStrategy.getDrawGraphics();
+                super.paint(g2d); // Call the super.paint to ensure proper painting
+
+                // Create the first buffer and set rendering hints
+                BufferedImage buffer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics bufferGraphics = buffer.getGraphics();
+                bufferGraphics.setColor(getBackground());
+                bufferGraphics.fillRect(0, 0, getWidth(), getHeight());
+
+                // Create the second buffer for triple buffering
+                BufferedImage buffer2 = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics bufferGraphics2 = buffer2.getGraphics();
+                bufferGraphics2.setColor(getBackground());
+                bufferGraphics2.fillRect(0, 0, getWidth(), getHeight());
+
+                int scaledTileSize = (int) (scaleFactor * tileSize);
+
+                for (int y = 0; y < boardHeight; y++) {
+                    for (int x = 0; x < boardWidth; x++) {
+                        int xPos = (int) (x * scaledTileSize * scaleFactor);  // Adjusted calculation
+                        int yPos = (int) (y * scaledTileSize * scaleFactor);  // Adjusted calculation
+
+                        String tileType = getTileType(x, y);
+                        Image tileImage = tileImages.get(tileType);
+
+                        // Draw background to the first buffer
+                        if (tileImage != null) {
+                            bufferGraphics.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
+                        } else {
+                            Color tileBackgroundColor = colorGrid.getBackgroundColor(x, y);
+                            bufferGraphics.setColor(tileBackgroundColor);
+                            bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                        }
+
+                        // Draw paint layer to the first buffer
+                        Color paintColor = colorGrid.getPaintColor(x, y);
+                        if (paintColor != null) {
+                            bufferGraphics.setColor(paintColor);
+                            bufferGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                        }
+
+                        // Draw player to the first buffer
+                        if (x == playerX && y == playerY) {
+                            double rotationAngle = 0.0;
+
+                            if ("north".equals(facingDirection)) {
+                                rotationAngle = Math.PI;
+                            } else if ("south".equals(facingDirection)) {
+                                rotationAngle = 0.0;
+                            } else if ("west".equals(facingDirection)) {
+                                rotationAngle = Math.PI / 2;
+                            } else if ("east".equals(facingDirection)) {
+                                rotationAngle = -Math.PI / 2;
+                            }
+
+                            int imageX = xPos + scaledTileSize / 2 - painterImage.getWidth() / 2;
+                            int imageY = yPos + scaledTileSize / 2 - painterImage.getHeight() / 2;
+                            drawRotatedImage(bufferGraphics, painterImage, imageX, imageY, rotationAngle);
+                        }
+                    }
+                }
+
+                // Draw the first buffer to the second buffer for triple buffering
+                bufferGraphics2.drawImage(buffer, 0, 0, this);
+
+                // Draw the second buffer to the screen
+                g2d.drawImage(buffer2, 0, getInsets().top, this);
+
+                // Dispose of the graphics contexts
+                bufferGraphics.dispose();
+                bufferGraphics2.dispose();
+
+                g2d.dispose();
+            } while (bufferStrategy.contentsRestored());
+
+            bufferStrategy.show();
+        } while (bufferStrategy.contentsLost());
+    }
+
+    private String getTileType(int x, int y) {
+        // Your logic to determine the type of tile at position (x, y)
+        // Return the type as a string
+        return "default"; // Change this based on your logic
+    }
+
+    private void drawRotatedImage(Graphics g, Image image, int x, int y, double angle) {
+        Graphics2D g2d = (Graphics2D) g.create();
+        g2d.translate(x + image.getWidth(null) / 2, y + image.getHeight(null) / 2);
+        g2d.rotate(angle);
+        g2d.drawImage(image, -image.getWidth(null) / 2, -image.getHeight(null) / 2, null);
+        g2d.dispose();
+    }
+
+    public int getBoardWidth() {
+        return boardWidth;
+    }
+
+    public int getBoardHeight() {
+        return boardHeight;
+    }
+
+    public String toString() {
+        return "Spawn X: " + playerX;
+    }
+
+    //##PainterPlus
+    private class PainterListener extends Painter implements KeyListener {
+        private static Color selectedColor;
+        private static boolean toggle = true;
+        private final int originalHeight = getHeight();
+        private final int originalWidth = getWidth();
+        private static JPanel preview;
+        private static JTextField red;
+        private static JTextField green;
+        private static JTextField blue;
+        private static JLabel error;
+        private Painter painter;
+        private static final Color[] defaultColors = {
+                Color.red,
+                Color.orange,
+                Color.yellow,
+                Color.green,
+                Color.cyan,
+                Color.blue,
+                new Color(255, 105, 180),
+                new Color(150, 0, 255),
+                new Color(139, 69, 19),
+                Color.white,
+                new Color(200, 200, 200),
+                Color.gray,
+                new Color(69, 69, 69),
+                Color.black
+        };
+        private static final Color[] COLORS = JsonFile.readColorArray("painter.json", "colors");
+
+        public PainterListener() {
+            this(0, 0, "east");
+        }
+
+        public PainterListener(int xCord, int yCord, String facing) {
+            addKeyListener(this);
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            ImageIcon icon = new ImageIcon("src/main/resources/assets/images/painter.png");
+            setIconImage(icon.getImage());
+
+            JButton button = new JButton();
+            button.addActionListener(e -> {
+                colorPickerUI();
+            });
+            colorPickerUI();
+        }
+
+        private void colorPickerUI() {
+            ColorPickerFrame frame = new ColorPickerFrame("Color Picker");
+        }
+
+        private static class ColorPickerFrame extends JFrame{
+            public ColorPickerFrame(String title) {
+                super(title);
+
+                setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                setSize(480, 250);
+                setLayout(new BorderLayout());
+                ImageIcon icon = new ImageIcon("src/main/resources/assets/images/colors.png");
+                setIconImage(icon.getImage());
+
+                boolean showCustom = true;
+                if (COLORS.length == 0) {
+                    showCustom = false;
+                }
+
+                JPanel selectedColorPreview = new JPanel();
+                selectedColorPreview.setBackground(Color.BLACK);
+                selectedColorPreview.setPreferredSize(new Dimension(30, 30));
+
+                JPanel defaultPanel = new JPanel(new GridLayout(2, 8, 5, 5));
+                for (Color color : defaultColors) {
+                    JButton colorButton = new JButton();
+                    colorButton.setBackground(color);
+                    colorButton.setPreferredSize(new Dimension(60, 60));
+                    colorButton.addActionListener(e -> selectedColor = color);
+                    selectedColorPreview.setBackground(selectedColor);
+                    defaultPanel.add(colorButton);
+                }
+
+                JPanel savedColorsPanel = new JPanel(new GridLayout(2, 8, 5, 5));
+                // Adjust the preferred size of the savedColorsPanel if necessary
+                for (Color color : COLORS) {
+                    JButton savedColorButton = new JButton();
+                    savedColorButton.setBackground(color);
+                    savedColorButton.setPreferredSize(new Dimension(60, 60));
+                    savedColorButton.addActionListener(e -> selectedColor = color);
+                    selectedColorPreview.setBackground(selectedColor);
+                    savedColorsPanel.add(savedColorButton);
+                }
+
+                preview = new JPanel(new BorderLayout());
+                preview.setPreferredSize(new Dimension(30, 30));
+                preview.setBackground(Color.BLACK);
+
+                ImageIcon imageIcon;
+
+                ImageIcon originalIcon = new ImageIcon("src/main/resources/assets/images/barrier.png");
+                Image image = originalIcon.getImage();
+                Image newImg = image.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+                imageIcon = new ImageIcon(newImg);
+
+                error = new JLabel(new ImageIcon(imageIcon.getImage()));
+
+                JPanel RGBPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                JLabel infoText = new JLabel("Custom RGB");
+                infoText.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                red = new JTextField();
+                green = new JTextField();
+                blue = new JTextField();
+
+                red.setPreferredSize(new Dimension(45, 30));
+                red.setFont(new Font("Arial", Font.ITALIC, 15));
+                red.setText("0");
+                red.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        char c = e.getKeyChar();
+                        if (Character.isDigit(c)) {
+                            super.keyTyped(e);
+                        } else {
+                            e.consume();
+                        }
+                    }
+                });
+                red.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+
+                });
+
+                green.setPreferredSize(new Dimension(45, 30));
+                green.setFont(new Font("Arial", Font.ITALIC, 15));
+                green.setText("0");
+                green.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+
+                });
+
+                blue.setPreferredSize(new Dimension(45, 30));
+                blue.setFont(new Font("Arial", Font.ITALIC, 15));
+                blue.setText("0");
+                blue.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        updatePreviewColor();
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+
+                    }
+
+                });
+
+                JLabel comma = new JLabel(",");
+                comma.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                NormalButtons.set();
+                JButton submitButton = new JButton("Use");
+                submitButton.addActionListener(e -> {
+                    selectedColor = new Color(Integer.parseInt(red.getText()), Integer.parseInt(green.getText()), Integer.parseInt(blue.getText()));
+                });
+                submitButton.setFocusable(false);
+
+                String[] buttons = {
+                        "Restart",
+                        "Continue",
+                        "Don't Show Again"
+                };
+                JButton saveButton = new JButton("Save");
+                saveButton.setFocusable(false);
+                saveButton.addActionListener(e -> {
+                    if (!Boolean.parseBoolean(JsonFile.read("painter.json", "data", "save_color_option"))) {
+                        int input = JOptionPane.showOptionDialog(
+                                null,
+                                "Program Restart Required to Use New Color",
+                                "Restart to Use New Color",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE,
+                                new ImageIcon("src/main/resource/assets/images/question_mark.png"),
+                                buttons,
+                                0
+                        );
+                        switch (input) {
+                            case 0:
+                                System.exit(0);
+                                break;
+                            case 2:
+                                JsonFile.writeln("painter.json", "data", "save_color_option", "true");
+                                break;
+                        }
+                    }
+                    JsonFile.writeToArray("painter.json", "colors", "new Color( " + red.getText() + "," + green.getText() + "," + blue.getText() + ")");
+                });
+
+                RGBPanel.add(preview);
+                RGBPanel.add(infoText);
+
+                RGBPanel.add(red);
+                RGBPanel.add(new JLabel(","));
+                RGBPanel.add(green);
+                RGBPanel.add(new JLabel(","));
+                RGBPanel.add(blue);
+
+                RGBPanel.add(submitButton);
+                RGBPanel.add(saveButton);
+
+                RGBPanel.add(selectedColorPreview);
+
+                JSlider slider = new JSlider(0,2,1);
+                slider.setMajorTickSpacing(1);
+                slider.setSnapToTicks(true);
+                slider.setBorder(new EmptyBorder(0,150,0,150));
+
+                JLabel defaultColorsText = new JLabel("Default Colors");
+                defaultColorsText.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                JLabel savedColors = new JLabel("Saved Colors");
+                savedColors.setFont(new Font("Arial", Font.PLAIN, 15));
+
+                JPanel globalPanel = new JPanel(new GridBagLayout());
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.gridx = 0;
+                gbc.gridy = 0;
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.weightx = 1.0;  // Allow horizontal expansion
+                globalPanel.add(defaultColorsText, gbc);
+
+                gbc.gridy = 1;
+                gbc.weighty = 1.0;  // Allow vertical expansion
+                gbc.anchor = GridBagConstraints.CENTER;
+                globalPanel.add(defaultPanel, gbc);
+
+                gbc.gridy = 2;
+                gbc.anchor = GridBagConstraints.WEST;
+                gbc.weighty = 0.0;  // Reset vertical expansion
+                if (showCustom) {
+                    globalPanel.add(savedColors, gbc);
+                }
+
+                gbc.gridy = 3;
+                gbc.weighty = 1.0;  // Allow vertical expansion
+                gbc.anchor = GridBagConstraints.CENTER;
+                if (showCustom) {
+                    globalPanel.add(savedColorsPanel, gbc);
+                    setSize(480, 400);
+                }
+
+                add(globalPanel, BorderLayout.CENTER);
+
+                JPanel footerPanel = new JPanel(new BorderLayout());
+                footerPanel.add(RGBPanel, BorderLayout.NORTH);
+                footerPanel.add(slider, BorderLayout.SOUTH);
+
+                add(footerPanel, BorderLayout.SOUTH);
+
+                addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent windowEvent) {
+                        dispose();
+                        toggle = false;
+                    }
+                });
+                setVisible(true);
+            }
+
+            private static void updatePreviewColor() {
+                try{
+                    if (!red.getText().isEmpty() && !green.getText().isEmpty() && !blue.getText().isEmpty() &&
+                            Integer.parseInt(red.getText()) <= 255 &&
+                            Integer.parseInt(green.getText()) <= 255 &&
+                            Integer.parseInt(blue.getText()) <= 255) {
+                        Color color = new Color(Integer.parseInt(red.getText()), Integer.parseInt(green.getText()), Integer.parseInt(blue.getText()));
+                        preview.setBackground(color);
+                    } else {
+                        preview.setBackground(null);
+                        preview.add(error, BorderLayout.CENTER);
+                    }
+                }catch (NumberFormatException e){
+                    System.out.println("Invalid Character in RGB Field");
+                    preview.setBackground(null);
+                }
+            }
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+            switch (e.getKeyChar()) {
+                case 'w':
+                    while (!Objects.equals(getFacingDirection(), "north")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 'd':
+                    while (!Objects.equals(getFacingDirection(), "east")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 's':
+                    while (!Objects.equals(getFacingDirection(), "south")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 'a':
+                    while (!Objects.equals(getFacingDirection(), "west")) {
+                        turnLeft();
+                    }
+                    move();
+                    break;
+                case 'e':
+                    turnRight();
+                    break;
+                case 'q':
+                    turnLeft();
+                    break;
+                case ' ':
+                    paintOld(selectedColor);
+                    repaint();
+                    break;
+            }
+            if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+                if (toggle) {
+                    System.exit(0);
+                }
+            }
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+
+        }
+    }
+}

@@ -1,12 +1,11 @@
-# Projects (mostly documentation for Neighborhood)
-## Majority of the files here (in com.boneless):
+# Documentation & Usage
 
 # Utils
 ## AudioPlayer
 AudioPlayer takes 1 parameter, that being the file name and plays the provided Audio File.
 ### Usage
-AudioPlayer will auto fill the directory to the path of 
-*src/main/resources/assets/* all thats needed is the filename.
+AudioPlayer will autofill the directory to the path of 
+*src/main/resources/assets/* all that's needed is the filename.
 
 #### AudioPlayer.play(filename);
 AudioPlayer does not need to its own instance, it can be called on via
@@ -128,16 +127,24 @@ Sets any unset JButtons to the OS default
 will play audio, but will not play video
 # --------------------------------------------------------
 # Neighborhood
-Copys almost all features from
+Copy's almost all features from
 https://studio.code.org/docs/ide/javalab/classes/Painter <br>
-There are some changes that need to be made, such as using String instead
-of Color for painting.
+~~There are some changes that need to be made, such as using String instead
+of Color for painting.~~ <br> 
+now uses string colors instead of java awt Color. if desired, use
+```paintOld(Color)``` for on the fly custom colors
 ## Painter
 Nothing new here
-### PainterListener (private)
-PainterListener is my "spin" on the painter. adds KeyListener, a color
-pallet, and the ability to save custom colors via RGB values. <br>
+### PainterListener
+PainterListener is just painter with extra steps. adds a KeyListener for movement, 
+a color pallet, and the ability to save custom colors via RGB values. <br>
 to use this new addon, all that is need is to use <br>
-````Painter name = new Painter(true)```` <br>
-from there, 2 new windows will show, the main Painter window, and
+````PainterListener name = new PainterListener()```` <br>
+when created, 2 new windows will show, the main Painter window, and
 the color pallet window with 14 preset colors.
+#### Controls
+WASD for movement <br>
+Space for Paint <br>
+Q, and E for rotating the painter
+R for taking paint
+ESC for exiting the program

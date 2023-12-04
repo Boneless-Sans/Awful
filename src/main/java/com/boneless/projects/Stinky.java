@@ -9,7 +9,7 @@ import javax.swing.border.Border;
 public class Stinky {
     public static void main(String[] args){
 
-        ImageIcon image = new ImageIcon("src/resource/assets/main.png");
+        ImageIcon image = new ImageIcon("assets/main.png");
         Border border = BorderFactory.createLineBorder(Color.GREEN,3);
         JLabel label = new JLabel();
 

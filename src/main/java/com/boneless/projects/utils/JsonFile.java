@@ -77,6 +77,42 @@ public class JsonFile {
                 System.out.println("Invalid mainKey");
             }
 
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+    public static String[][] read2DArray(String filename, String mainKey) {
+        try (Reader reader = new FileReader(getFilePath(filename))) {
+            JSONTokener tokener = new JSONTokener(reader);
+            JSONObject jsonObject = new JSONObject(tokener);
+
+            if (jsonObject.has(mainKey)) {
+                Object mainValue = jsonObject.get(mainKey);
+
+                if (mainValue instanceof JSONArray) {
+                    JSONArray outerArray = (JSONArray) mainValue;
+                    int rows = outerArray.length();
+                    int cols = ((JSONArray) outerArray.get(0)).length(); // Assuming all inner arrays have the same length
+
+                    String[][] resultArray = new String[rows][cols];
+
+                    for (int i = 0; i < rows; i++) {
+                        JSONArray innerArray = (JSONArray) outerArray.get(i);
+                        for (int j = 0; j < cols; j++) {
+                            resultArray[i][j] = innerArray.getString(j);
+                        }
+                    }
+
+                    return resultArray;
+                } else {
+                    System.out.println("Invalid array type");
+                }
+            } else {
+                System.out.println("Invalid mainKey");
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -85,6 +121,52 @@ public class JsonFile {
 
         return null;
     }
+    public static String[] readTwoKeysArray(String filename, String firstKey, String secondKey) {
+        try (Reader reader = new FileReader(getFilePath(filename))) {
+            JSONTokener tokener = new JSONTokener(reader);
+            JSONObject jsonObject = new JSONObject(tokener);
+
+            if (jsonObject.has(firstKey)) {
+                Object firstValue = jsonObject.get(firstKey);
+
+                if (firstValue instanceof JSONObject) {
+                    JSONObject nestedObject = (JSONObject) firstValue;
+
+                    if (nestedObject.has(secondKey)) {
+                        Object secondValue = nestedObject.get(secondKey);
+
+                        if (secondValue instanceof JSONArray) {
+                            JSONArray arrayValue = (JSONArray) secondValue;
+                            int length = arrayValue.length();
+                            String[] resultArray = new String[length];
+
+                            for (int i = 0; i < length; i++) {
+                                resultArray[i] = arrayValue.getString(i);
+                            }
+
+                            return resultArray;
+                        } else {
+                            System.out.println("Invalid array type for secondKey");
+                        }
+                    } else {
+                        System.out.println("Invalid secondKey");
+                    }
+                } else {
+                    System.out.println("Invalid nested object type");
+                }
+            } else {
+                System.out.println("Invalid firstKey");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static Color[] readColorArray(String filename, String mainKey) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
             JSONTokener tokener = new JSONTokener(reader);
@@ -149,6 +231,29 @@ public class JsonFile {
         }
 
         return null;
+    }
+    public static boolean checkCredentials(String filename, String username, String password) {
+        try (Reader reader = new FileReader(getFilePath(filename))) {
+            JSONTokener tokener = new JSONTokener(reader);
+            JSONArray jsonArray = new JSONArray(tokener);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject userObject = jsonArray.getJSONObject(i);
+
+                if (userObject.has("username") && userObject.has("password")) {
+                    String storedUsername = userObject.getString("username");
+                    String storedPassword = userObject.getString("password");
+
+                    if (username.equals(storedUsername) && password.equals(storedPassword)) {
+                        return true;  // Credentials match
+                    }
+                }
+            }
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return false;  // No matching credentials found
     }
 
     public static void writeToArray(String filename, String mainKey, String data) {

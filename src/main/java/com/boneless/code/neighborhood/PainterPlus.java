@@ -61,7 +61,7 @@ public class PainterPlus extends Painter{
             move();
         }
     }
-    public void paintToEmpty(Color color){
+    public void paintToEmpty(String color){
         while(hasPaint() && canMove()){
             paint(color);
             move();
@@ -73,7 +73,7 @@ public class PainterPlus extends Painter{
         }
         takeAllPaint();
     }
-    public void paintDonut(Color color){
+    public void paintDonut(String color){
         paint(color);
         move();
         paint(color);
@@ -83,7 +83,7 @@ public class PainterPlus extends Painter{
         move();
         paint(color);
     }
-    public void paintDashes(Color color){
+    public void paintDashes(String color){
         while(hasPaint()){
             paint(color);
             move();
@@ -94,7 +94,7 @@ public class PainterPlus extends Painter{
             }
         }
     }
-    public void paintLine(Color color, int move){
+    public void paintLine(String color, int move){
         int set = move;
         set = set - 1;
         while (canMove() && move > set){
