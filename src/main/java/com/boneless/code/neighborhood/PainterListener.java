@@ -363,6 +363,9 @@ public class PainterListener extends Painter implements KeyListener {
                 takePaint();
                 System.out.println("Player paint count: " + getMyPaint());
                 break;
+            case'f':
+                addPaintBucket(getX(),getY(),1);
+                break;
             case ' ':
                 paintOld(selectedColor);
                 repaint();

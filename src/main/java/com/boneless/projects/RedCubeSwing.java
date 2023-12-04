@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class RedCubeSwing extends JFrame implements ActionListener {
 
@@ -28,6 +30,33 @@ public class RedCubeSwing extends JFrame implements ActionListener {
         JPanel panel = new JPanel();
         panel.add(exitButton);
         add(panel, BorderLayout.SOUTH);
+
+        addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
 
         // Set the size of the JFrame
         setSize(500, 500);
@@ -54,7 +83,7 @@ public class RedCubeSwing extends JFrame implements ActionListener {
             double radianY = Math.toRadians(angleY);
             double radianZ = Math.toRadians(angleZ);
 
-            int size = 100;
+            int size = 200;
 
             // Define the cube vertices
             int[][] vertices = {

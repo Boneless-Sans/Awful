@@ -213,11 +213,11 @@ public class Painter extends JFrame {
     }
 
     public int getX() {
-        return playerX - 1;
+        return playerX;
     }
 
     public int getY() {
-        return playerY - 1;
+        return playerY;
     }
 
     public boolean isFacingNorth() {
