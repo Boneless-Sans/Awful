@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class DataRunner {
     public static void main(String[] args) {
-        UserStory user = new UserStory("artists.txt","albums.txt","genres");
+        UserStory user = new UserStory("artists.txt","albums.txt","genres.txt");
+        user.init();
     }
 }
