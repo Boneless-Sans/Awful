@@ -10,19 +10,19 @@ import java.util.Scanner;
 public class UserStory {
     private static String[] artists;
     private static String[] albums;
-    private static String[] genre;
+    private static String[] masterGenres;
     private static boolean doRun = true;
     private static HashMap<String, String> map = new HashMap<String, String>();
     private static Scanner scan = new Scanner(System.in);
     public UserStory(){
         this.artists = StupidFileReader.toStringArray("artists.txt");
         this.albums = StupidFileReader.toStringArray("albums.txt");
-        this.genre = StupidFileReader.toStringArray("genre.txt");
+        masterGenres = StupidFileReader.toStringArray("genre.txt");
     }
     public UserStory(String artists, String albums, String genre){
         this.artists = StupidFileReader.toStringArray(artists);
         this.albums = StupidFileReader.toStringArray(albums);
-        this.genre = StupidFileReader.toStringArray(genre);
+        masterGenres = StupidFileReader.toStringArray(genre);
     }
     public static void init(){
         while(doRun){
@@ -37,11 +37,12 @@ public class UserStory {
             }
         }
     }
-    private static void chooseArtist(String genre){
-        System.out.println("What Arist would you like for " + genre + "?");
-        String input = scan.nextLine().toLowerCase();
-        System.out.println(printArtists(genre));
-
+    private static void chooseArtist(String selectedGenre){
+        for (int i = 0; i < masterGenres.length;i++) {
+            if (masterGenres[i].equalsIgnoreCase(selectedGenre)) {
+                System.out.println("Artist: " + artists[i] + " Album: " + albums[i]);
+            }
+        }
     }
     private static String printArtists(String genre){
         String result = "Artists\n----------------------\n";
@@ -50,5 +51,4 @@ public class UserStory {
         }
         return result;
     }
-
 }
