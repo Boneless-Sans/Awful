@@ -1,0 +1,59 @@
+{
+  "default": {
+    "x": "10",
+    "y": "10"
+  },
+  "tiles": [
+    ["tl","s","s","s","tr"],
+    ["v","b","b","b","v"],
+    ["v","b","b","b","v"],
+    ["v","b","b","b","v"],
+    ["br","s","s","s","br"]
+  ],
+  "data": {"save_color_option": "true"},
+  "wall_key": {
+    "b": "blank",
+
+    "s": "straight",
+    "v": "vertical",
+    "tl": "top_left_corner",
+    "tr": "top_right_corner",
+    "bl": "bottom_left_corner",
+    "br": "bottom_right_corner",
+    "c": "center",
+
+    "cs": "cracked_straight",
+    "cv": "cracked_vertical",
+    "cvf": "cracked_vertical_flipped",
+    "cr": "cracked_top_right",
+    "cl": "cracked_bottom_left",
+
+    "et": "wall_end_top",
+    "eb": "wall_end_bottom",
+    "el": "wall_end_left",
+    "er": "wall_end_right"
+  },
+  "wall": {
+    "straight": "wallTile[1]",
+    "vertical": "wallTile[10]",
+    "top_left_corner": "wallTile[0]",
+    "top_right_corner": "wallTile[2]",
+    "bottom_left_corner": "wallTile[20]",
+    "bottom_right_corner": "wallTile[22]",
+    "center": "wallTile[11]",
+
+    "cracked_straight": "wallTile[4]",
+    "cracked_vertical": "wallTile[13]",
+    "cracked_vertical_flipped": "wallTile[27]",
+    "cracked_top_right": "wallTile[7]",
+    "cracked_bottom_left": "wallTile[33]",
+
+    "wall_end_top": "wallTile[8]",
+    "wall_end_bottom": "wallTile[28]",
+    "wall_end_left": "wallTile[14]",
+    "wall_end_right": "wallTile[16]"
+  },
+  "colors": [
+
+  ]
+}
