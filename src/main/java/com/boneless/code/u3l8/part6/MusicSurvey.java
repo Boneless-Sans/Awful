@@ -1,6 +1,6 @@
 package com.boneless.code.u3l8.part6;
 
-import com.boneless.code.util.aFileReader;
+import com.boneless.code.util.StupidFileReader;
 
 /*
  * Manages data about responses to a survey
@@ -20,8 +20,8 @@ public class MusicSurvey {
      * Returns a 1D array of Respondent objects using the data from hoursFile and effectsFile
      */
     public Respondent[] createResponses(String hoursFile, String effectsFile) {
-        double[] hoursData = aFileReader.toDoubleArray(hoursFile);
-        String[] effectsData = aFileReader.toStringArray(effectsFile);
+        double[] hoursData = StupidFileReader.toDoubleArray(hoursFile);
+        String[] effectsData = StupidFileReader.toStringArray(effectsFile);
 
         Respondent[] tempResponses = new Respondent[hoursData.length];
 

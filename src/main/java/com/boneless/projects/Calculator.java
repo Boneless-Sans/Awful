@@ -1,5 +1,7 @@
 package com.boneless.projects;
 
+import com.boneless.projects.utils.SystemUI;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -30,12 +32,15 @@ public class Calculator extends JFrame {
         JLabel text = new JLabel("0");
         text.setFont(new Font("Arial", Font.PLAIN, 25));
         textPanel.add(text);
+        textPanel.setPreferredSize(new Dimension(50,35));
 
+        SystemUI.set();
         JButton dot = new JButton(".");
         JPanel buttons = new JPanel(new GridLayout(4, 3));
         for (int i = 1; i < 10; i++) {
             JButton button = new JButton(String.valueOf(i));
             button.setFocusable(false);
+            button.setFocusPainted(false);
             button.addActionListener(e -> {
                 calc.append(button.getText());
                 text.setText(calc.toString());
@@ -48,9 +53,12 @@ public class Calculator extends JFrame {
         JButton clear = new JButton("C");
         clear.setFocusable(false);
         clear.addActionListener(e -> {
-            calc.deleteCharAt(calc.length() - 1);
-            text.setText(calc.toString());
-            enableButtons(symbolButtons);
+            if(text.getText() != null) {
+                calc.deleteCharAt(calc.length() - 1);
+                text.setText(calc.toString());
+                enableButtons(symbolButtons);
+                System.out.println("null?");
+            }
         });
 
         JButton zero = new JButton("0");
@@ -92,14 +100,13 @@ public class Calculator extends JFrame {
         JButton doMath = new JButton("=");
         doMath.setFocusable(false);
         doMath.addActionListener(e -> {
-            int answer = evaluateMathExpression(mathExpression.toString());
-            text.setText(String.valueOf(answer));
+            text.setText(null);
         });
 
         add(textPanel, BorderLayout.NORTH);
         add(buttons, BorderLayout.CENTER);
         add(math, BorderLayout.EAST);
-        //add(doMath, BorderLayout.SOUTH);
+        add(doMath, BorderLayout.SOUTH);
     }
 
     public static int evaluateMathExpression(String mathExpression) {

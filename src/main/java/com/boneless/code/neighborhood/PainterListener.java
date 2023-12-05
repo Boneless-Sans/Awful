@@ -1,11 +1,9 @@
 package com.boneless.code.neighborhood;
 
-import com.boneless.code.neighborhood.Painter;
 import com.boneless.projects.utils.JsonFile;
-import com.boneless.projects.utils.NormalButtons;
+import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -207,7 +205,7 @@ public class PainterListener extends Painter implements KeyListener {
             JLabel comma = new JLabel(",");
             comma.setFont(new Font("Arial", Font.PLAIN, 15));
 
-            NormalButtons.set();
+            SystemUI.set();
             JButton submitButton = new JButton("Use");
             submitButton.addActionListener(e -> {
                 selectedColor = new Color(Integer.parseInt(red.getText()), Integer.parseInt(green.getText()), Integer.parseInt(blue.getText()));

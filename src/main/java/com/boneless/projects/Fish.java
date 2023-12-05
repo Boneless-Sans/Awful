@@ -20,7 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.boneless.projects.utils.IconResize;
-import com.boneless.projects.utils.NormalButtons;
+import com.boneless.projects.utils.SystemUI;
 
 
 public class Fish {
@@ -95,7 +95,7 @@ public class Fish {
                 }
             });
 
-            NormalButtons.set();
+            SystemUI.set();
 
             panel.add(mainText);
             panel.add(fish);

@@ -1,6 +1,6 @@
 package com.boneless.code.u3l7.part6;
 
-import com.boneless.code.util.aFileReader;
+import com.boneless.code.util.StupidFileReader;
 
 /*
  * Manages data about best selling video games
@@ -20,8 +20,8 @@ public class Nintendo {
      * Returns a 1D array of Game objects using the data from titlesFile and copiesFile
      */
     public Game[] createGames(String titlesFile, String copiesFile) {
-        String[] titlesData = aFileReader.toStringArray(titlesFile);
-        int[] copiesData = aFileReader.toIntArray(copiesFile);
+        String[] titlesData = StupidFileReader.toStringArray(titlesFile);
+        int[] copiesData = StupidFileReader.toIntArray(copiesFile);
         Game[] tempGames = new Game[titlesData.length];
 
         for (int index = 0; index < tempGames.length; index++) {

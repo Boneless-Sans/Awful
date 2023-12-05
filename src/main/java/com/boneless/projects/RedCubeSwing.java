@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 public class RedCubeSwing extends JFrame implements ActionListener {
 
@@ -118,7 +120,6 @@ public class RedCubeSwing extends JFrame implements ActionListener {
         // Exit the program when the button is clicked
         System.exit(0);
     }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(RedCubeSwing::new);
     }

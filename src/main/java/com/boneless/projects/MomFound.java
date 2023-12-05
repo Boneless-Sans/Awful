@@ -2,7 +2,7 @@ package com.boneless.projects;
 
 import com.boneless.projects.utils.DataSender;
 import com.boneless.projects.utils.Lockout;
-import com.boneless.projects.utils.NormalButtons;
+import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,7 +48,7 @@ public class MomFound extends JFrame {
         JLabel text = new JLabel("mom found the");
         text.setFont(new Font("Arial",Font.PLAIN,15));
 
-        NormalButtons.set();
+        SystemUI.set();
 
         JComboBox<String> object = new JComboBox<>(objects);
         object.setFocusable(false);

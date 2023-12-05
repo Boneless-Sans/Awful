@@ -1,7 +1,6 @@
 package com.boneless.code.neighborhood;
 
-import com.boneless.projects.Main;
-import com.boneless.projects.utils.NormalButtons;
+import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +21,7 @@ public class MainScreen extends JFrame {
     private void initUI(){
         JPanel mainPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
 
-        NormalButtons.set();
+        SystemUI.set();
         JButton start = new JButton("Start");
 
         JButton levelEditor = new JButton("Level Editor");

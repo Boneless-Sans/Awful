@@ -3,7 +3,7 @@ package com.boneless.code.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 
-public class ConstructorsHelper {
+public class ConstructorsHelper{
     // Method to print constructors of an object
     public static void printConstructors(Object obj) {
         // Get the class of the provided object

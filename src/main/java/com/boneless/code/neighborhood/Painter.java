@@ -1,8 +1,6 @@
 package com.boneless.code.neighborhood;
 
-import com.boneless.projects.utils.IconResize;
 import com.boneless.projects.utils.JsonFile;
-import com.boneless.projects.utils.NormalButtons;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -11,15 +9,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.Timer;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 class ColorGrid {
     private Map<String, Color> backgroundColors = new HashMap<>();

@@ -1,7 +1,7 @@
 package com.boneless.projects;
 
 import com.boneless.projects.utils.AudioPlayer;
-import com.boneless.projects.utils.NormalButtons;
+import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +12,7 @@ public class Buzzer extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
 
-        NormalButtons.set();
+        SystemUI.set();
 
         JButton correct = new JButton("Correct");
         correct.addActionListener(e -> {

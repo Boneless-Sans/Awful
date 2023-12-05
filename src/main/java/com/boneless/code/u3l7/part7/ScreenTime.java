@@ -1,6 +1,6 @@
 package com.boneless.code.u3l7.part7;
 
-import com.boneless.code.util.aFileReader;
+import com.boneless.code.util.StupidFileReader;
 
 /*
  * Manages data about screen time
@@ -14,7 +14,7 @@ public class ScreenTime {
      * to initialize socialNetworkTimes
      */
     public ScreenTime(String filename) {
-        socialNetworkTimes = aFileReader.toIntArray(filename);
+        socialNetworkTimes = StupidFileReader.toIntArray(filename);
     }
 
     /*

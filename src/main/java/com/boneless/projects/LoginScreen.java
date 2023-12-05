@@ -1,7 +1,7 @@
 package com.boneless.projects;
 
 import com.boneless.projects.utils.JsonFile;
-import com.boneless.projects.utils.NormalButtons;
+import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +35,7 @@ public class LoginScreen extends JFrame{
         passwordField.setPreferredSize(new Dimension(150,30));
         passwordField.setFont(new Font("Arial", Font.PLAIN, 15));
 
-        NormalButtons.set();
+        SystemUI.set();
         JButton login = new JButton("Login");
         login.setFont(new Font("Arial", Font.PLAIN, 15));
         login.addActionListener(e -> {
