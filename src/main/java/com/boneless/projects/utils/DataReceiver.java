@@ -1,5 +1,6 @@
 package com.boneless.projects.utils;
 
+import com.boneless.code.neighborhood.Painter;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -43,6 +44,8 @@ public class DataReceiver {
             } else if(input.equalsIgnoreCase("clear") || input.equalsIgnoreCase("cls")){
                 System.out.print("\033[H\033[2J");
                 System.out.flush();
+            } else if(input.equalsIgnoreCase("ip")){
+                System.out.println("IP: ");
             }
             else {
                 System.out.println("Unknown command. Type 'help' for a list of commands.");
@@ -88,5 +91,6 @@ public class DataReceiver {
         System.out.println("  help - Display this help message");
         System.out.println("  stop - Stop the server and write data to file");
         System.out.println("  clear - Clears the terminal");
+        System.out.println("  ip - Displays server IP Address");
     }
 }

@@ -230,13 +230,6 @@ public class Painter extends JFrame {
     }
 
     public boolean isOnBucket() {
-        return false;
-    }
-
-    public boolean isOnPaint() {
-        return true;
-    }
-    public boolean isOnPaintBucket() {
         for (Map.Entry<String, PaintBucket> entry : paintBuckets.entrySet()) {
             PaintBucket paintBucket = entry.getValue();
             if (playerX == paintBucket.getX() && playerY == paintBucket.getY()) {
@@ -244,6 +237,10 @@ public class Painter extends JFrame {
             }
         }
         return false;
+    }
+
+    public boolean isOnPaint() {
+        return true;
     }
     public boolean hasPaint() {
         if (paintCount > 0) {
@@ -322,7 +319,11 @@ public class Painter extends JFrame {
 
     public void paint(String color) {
         // Set the paint color in the color grid
-        colorGrid.setPaintColor(playerX, playerY, stringToColor(color));
+        if(hasPaint()) {
+            colorGrid.setPaintColor(playerX, playerY, stringToColor(color));
+        }else{
+            System.out.println("There is no more paint in the painter's bucket");
+        }
 
         // Check if the current position has a paint bucket
         String key = getKey(playerX, playerY);
@@ -458,8 +459,6 @@ public class Painter extends JFrame {
         }
     }
     private void drawPaintCan(Graphics2D g2d, int x, int y) {
-        System.out.println("Drawing paint can at (" + x + ", " + y + ")");
-
         int scaledTileSize = (int) (scaleFactor * tileSize);
         int xPos = (int) (x * scaledTileSize * scaleFactor);
         int yPos = (int) (y * scaledTileSize * scaleFactor) + getInsets().top;
@@ -499,8 +498,6 @@ public class Painter extends JFrame {
                         // Paint bucket is empty, remove it from the map
                         paintBuckets.remove(key);
                     }
-                } else {
-                    System.out.println("No paint bucket found at (" + x + ", " + y + ")");
                 }
             } else {
                 System.err.println("Error loading paint can image.");
@@ -508,10 +505,7 @@ public class Painter extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Drawing paint can completed");
     }
-
-
     private String getTileType(int x, int y) {
         String key = getKey(x, y);
 

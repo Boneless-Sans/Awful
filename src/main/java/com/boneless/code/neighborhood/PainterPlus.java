@@ -1,7 +1,5 @@
 package com.boneless.code.neighborhood;
 
-import java.awt.*;
-
 public class PainterPlus extends Painter{
 
     public void moveNum(int num){
