@@ -28,7 +28,7 @@ public class Fish {
     private JFrame frame;
 
     public static void main(String[] args) {
-        ImageIcon icon = new ImageIcon("src/resource/assets/le_fishe.png");
+        ImageIcon icon = new ImageIcon("src/main/resource/assets/le_fishe.png");
         try {
             if (!Files.exists(Paths.get(userProfile))) {
                 Fish fish = new Fish();

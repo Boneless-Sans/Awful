@@ -1,6 +1,7 @@
 package com.boneless.projects;
 
 import com.boneless.projects.utils.IconResize;
+import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,8 +16,8 @@ public class CheckMark extends JFrame implements ActionListener {
     CheckMark(){
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new FlowLayout());
-        checkMark = new IconResize("src/resource/assets/check_mark.png", 20,20);
-        xMark = new IconResize("src/resource/assets/x_mark.png", 20,20);
+        checkMark = new IconResize("src/main/resource/assets/check_mark.png", 20,20);
+        xMark = new IconResize("src/main/resource/assets/x_mark.png", 20,20);
 
         button = new JButton("Submit");
         button.addActionListener(this);
