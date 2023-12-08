@@ -5,6 +5,7 @@ import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 public class LoginScreen extends JFrame{
     public LoginScreen() {
@@ -39,7 +40,9 @@ public class LoginScreen extends JFrame{
         JButton login = new JButton("Login");
         login.setFont(new Font("Arial", Font.PLAIN, 15));
         login.addActionListener(e -> {
-            checkCreds(usernameField.getText(),passwordField.getText());
+            char[] passwordChars = passwordField.getPassword();
+            String password = new String(passwordChars);
+            checkCreds(usernameField.getText(), password);
         });
         login.setFocusable(false);
 

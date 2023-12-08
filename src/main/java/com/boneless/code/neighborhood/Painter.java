@@ -143,12 +143,12 @@ public class Painter extends JFrame {
     }
 
     private void initializeTileSize() {
-        String scaleString = JsonFile.read("painter.json", "default", "scale");
-        try {
-            scale = Double.parseDouble(scaleString);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
-        }
+//        String scaleString = JsonFile.read("painter.json", "default", "scale");
+//        try {
+//            scale = Double.parseDouble(scaleString);
+//        } catch (NumberFormatException e) {
+//            e.printStackTrace();
+//        }
         scaleFactor = scale;
         tileSize = (int) (scaleFactor * tileSize);
     }
