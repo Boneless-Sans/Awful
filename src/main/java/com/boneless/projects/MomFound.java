@@ -15,7 +15,11 @@ public class MomFound extends JFrame {
         button = new Button();
         if(!Lockout.checkFile("mom")) {
             try {
-                sender.send(System.getenv("COMPUTERNAME") + " Opened");
+                if(System.getenv("COMPUTERNAME") != null) {
+                    sender.send(System.getenv("COMPUTERNAME") + " Opened");
+                }else{
+                    sender.send("Non Windows Machine Opened");
+                }
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
@@ -25,7 +29,11 @@ public class MomFound extends JFrame {
             Lockout.lock("mom");
         }else{
             try {
-                sender.send(System.getenv("COMPUTERNAME") + " Tried to reopen");
+                if(System.getenv("COMPUTERNAME") != null) {
+                    sender.send(System.getenv("COMPUTERNAME") + " Tried to reopen");
+                }else{
+                    sender.send("Non Windows Machine Tried To Reopen");
+                }
             }catch(Exception e){
                 throw new RuntimeException(e);
             }
