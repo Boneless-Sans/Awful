@@ -7,6 +7,8 @@ import org.json.JSONTokener;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class JsonFile {
 
@@ -305,11 +307,15 @@ public class JsonFile {
         }
     }
 
+//    private static String getFilePath(String filename) {
+//        String directory = System.getProperty("user.dir") + DEFAULT_DIRECTORY;
+//        return directory + filename;
+//    }
     private static String getFilePath(String filename) {
-        String directory = System.getProperty("user.dir") + DEFAULT_DIRECTORY;
+        Path currentDir = Paths.get("");
+        String directory = currentDir.toAbsolutePath() + DEFAULT_DIRECTORY;
         return directory + filename;
     }
-
     private static JSONObject readJsonObject(String filename) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
             JSONTokener tokener = new JSONTokener(reader);

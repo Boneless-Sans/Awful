@@ -228,8 +228,7 @@ public class PainterListener extends Painter implements KeyListener {
                             JOptionPane.YES_NO_OPTION,
                             JOptionPane.INFORMATION_MESSAGE,
                             new ImageIcon("src/main/resource/assets/images/question_mark.png"),
-                            buttons,
-                            0
+                            buttons, 0
                     );
                     switch (input) {
                         case 0:
