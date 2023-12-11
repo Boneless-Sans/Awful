@@ -377,11 +377,7 @@ public class Painter extends JFrame {
     private void drawTilesAndPaint(Graphics2D g2d) {
         int scaledTileSize = (int) (scaleFactor * tileSize);
 
-        // Create a buffered image for the entire paint layer
-        BufferedImage paintLayer = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D paintLayerGraphics = paintLayer.createGraphics();
-
-        // Draw tiles and paint to the paint layer
+        // Draw the background
         for (int y = 0; y < boardHeight; y++) {
             for (int x = 0; x < boardWidth; x++) {
                 int xPos = (int) (x * scaledTileSize * scaleFactor);
@@ -390,48 +386,48 @@ public class Painter extends JFrame {
                 String tileType = getTileType(x, y);
                 Image tileImage = tileImages.get(tileType);
 
-                if (tileImage != null) {
-                    // Draw the tile image to the paint layer
-                    paintLayerGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-                    paintLayerGraphics.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
-                } else {
+                if (tileImage == null) {
                     Color tileBackgroundColor = colorGrid.getBackgroundColor(x, y);
 
                     // Check if there is a paint bucket at the current position
                     String key = getKey(x, y);
                     if (!paintBuckets.containsKey(key)) {
-                        paintLayerGraphics.setColor(tileBackgroundColor);
-                        paintLayerGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                        g2d.setColor(tileBackgroundColor);
+                        g2d.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
                     }
                 }
-
-                Color paintColor = colorGrid.getPaintColor(x, y);
-                if (paintColor != null) {
-                    // Draw the paint color to the paint layer
-                    paintLayerGraphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-                    paintLayerGraphics.setColor(paintColor);
-                    paintLayerGraphics.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
-                }
             }
         }
 
-        // Draw the entire paint layer to the main graphics
-        g2d.drawImage(paintLayer, 0, 0, null);
-
-        // Draw paint cans separately after background tiles
+        // Draw paint and tiles
         for (int y = 0; y < boardHeight; y++) {
             for (int x = 0; x < boardWidth; x++) {
+                int xPos = (int) (x * scaledTileSize * scaleFactor);
+                int yPos = (int) (y * scaledTileSize * scaleFactor) + getInsets().top;
+
                 String tileType = getTileType(x, y);
+                Image tileImage = tileImages.get(tileType);
+
                 if ("paint_bucket".equals(tileType)) {
                     drawPaintCan(g2d, x, y);
+                } else {
+                    if (tileImage != null) {
+                        // Draw the tile image with transparency
+                        g2d.setComposite(AlphaComposite.SrcOver); // Ensure SRC_OVER composite
+                        g2d.drawImage(tileImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
+                    }
+
+                    Color paintColor = colorGrid.getPaintColor(x, y);
+                    if (paintColor != null) {
+                        // Draw the paint color with transparency
+                        g2d.setComposite(AlphaComposite.SrcOver);
+                        g2d.setColor(paintColor);
+                        g2d.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                    }
                 }
             }
         }
-
-        // Dispose of the paint layer graphics
-        paintLayerGraphics.dispose();
     }
-
 
     private void drawPlayer(Graphics2D g2d) {
         int scaledTileSize = (int) (scaleFactor * tileSize);
@@ -463,49 +459,60 @@ public class Painter extends JFrame {
         int xPos = (int) (x * scaledTileSize * scaleFactor);
         int yPos = (int) (y * scaledTileSize * scaleFactor) + getInsets().top;
 
-        try {
-            // Load the paint can image
-            InputStream paintCanStream = getClass().getResourceAsStream("/assets/images/paint_can.png");
-            if (paintCanStream != null) {
-                Image paintCanImage = ImageIO.read(paintCanStream);
+        // Check if the current position has a paint bucket
+        String key = getKey(x, y);
+        PaintBucket paintBucket = paintBuckets.get(key);
 
-                // Check if the current position has a paint bucket
-                String key = getKey(x, y);
-                PaintBucket paintBucket = paintBuckets.get(key);
+        if (paintBucket != null && paintBucket.getAmount() > 0) {
+            try {
+                // Load the paint can image
+                InputStream paintCanStream = getClass().getResourceAsStream("/assets/images/paint_can.png");
+                if (paintCanStream != null) {
+                    BufferedImage paintCanImage = ImageIO.read(paintCanStream);
 
-                if (paintBucket != null) {
-                    int paintAmount = paintBucket.getAmount();
-
-                    if (paintAmount > 0) {
-                        Composite originalComposite = g2d.getComposite(); // Store the original composite
-
-                        // Draw the paint can image
-                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f)); // Set full opacity
-                        g2d.drawImage(paintCanImage, xPos, yPos, scaledTileSize, scaledTileSize, null);
-
-                        // Set font and color for drawing text
-                        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-                        g2d.setColor(Color.BLACK);
-
-                        // Draw the paint amount text
-                        String text = Integer.toString(paintAmount);
-                        int textX = xPos + scaledTileSize / 2 - g2d.getFontMetrics().stringWidth(text) / 2;
-                        int textY = yPos + scaledTileSize / 2 + g2d.getFontMetrics().getAscent() / 2;
-                        g2d.drawString(text, textX, textY);
-
-                        g2d.setComposite(originalComposite); // Restore the original composite
-                    } else {
-                        // Paint bucket is empty, remove it from the map
-                        paintBuckets.remove(key);
+                    // Set the transparency based on the paint amount
+                    float transparency = 1.0f; // fully opaque
+                    if (paintBucket.getAmount() < 100) {
+                        transparency = paintBucket.getAmount() / 100.0f; // adjust as needed
                     }
+
+                    // Create an image with transparency
+                    BufferedImage transparentPaintCan = new BufferedImage(
+                            paintCanImage.getWidth(), paintCanImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g = transparentPaintCan.createGraphics();
+                    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transparency));
+                    g.drawImage(paintCanImage, 0, 0, null);
+                    g.dispose();
+
+                    // Draw the transparent paint can image
+                    g2d.drawImage(transparentPaintCan, xPos, yPos, scaledTileSize, scaledTileSize, null);
+
+                    // Draw the tile background if it's not a paint bucket
+                    if (!"paint_bucket".equals(getTileType(x, y))) {
+                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+                        Color tileBackgroundColor = colorGrid.getBackgroundColor(x, y);
+                        g2d.setColor(tileBackgroundColor);
+                        g2d.fillRect(xPos, yPos, scaledTileSize, scaledTileSize);
+                    }
+
+                    // Set font and color for drawing text
+                    g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+                    g2d.setColor(Color.BLACK);
+
+                    // Draw the paint amount text
+                    String text = Integer.toString(paintBucket.getAmount());
+                    int textX = xPos + scaledTileSize / 2 - g2d.getFontMetrics().stringWidth(text) / 2;
+                    int textY = yPos + scaledTileSize / 2 + g2d.getFontMetrics().getAscent() / 2;
+                    g2d.drawString(text, textX, textY);
+                } else {
+                    System.err.println("Error loading paint can image.");
                 }
-            } else {
-                System.err.println("Error loading paint can image.");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
+
     private String getTileType(int x, int y) {
         String key = getKey(x, y);
 

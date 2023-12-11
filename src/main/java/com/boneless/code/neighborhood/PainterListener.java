@@ -228,8 +228,7 @@ public class PainterListener extends Painter implements KeyListener {
                             JOptionPane.YES_NO_OPTION,
                             JOptionPane.INFORMATION_MESSAGE,
                             new ImageIcon("src/main/resource/assets/images/question_mark.png"),
-                            buttons,
-                            0
+                            buttons, 0
                     );
                     switch (input) {
                         case 0:
@@ -326,7 +325,8 @@ public class PainterListener extends Painter implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        switch (e.getKeyChar()) {
+        char keyChar = Character.toLowerCase(e.getKeyChar());
+        switch (keyChar) {
             case 'w':
                 while (!Objects.equals(getFacingDirection(), "north")) {
                     turnLeft();

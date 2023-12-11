@@ -6,11 +6,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class DataSender {
-    private static String serverUrl = "http://localhost:8080/receive";
+    private static String serverUrl = "localhost:8080/receive";
 
     public DataSender(){}
     public DataSender(String URL){
-        serverUrl = "http://" + URL;
+        serverUrl = URL;
     }
     public void send(String data) throws Exception {
         URL serverURL = new URL(serverUrl);
