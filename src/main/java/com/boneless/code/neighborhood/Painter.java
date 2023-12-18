@@ -80,6 +80,7 @@ public class Painter extends JFrame {
 
         int frameWidth = (int) (scaleFactor * tileSize * boardWidth) + getInsets().left + getInsets().right;
         int frameHeight = (int) (scaleFactor * tileSize * boardHeight) + getInsets().top + getInsets().bottom + 35;
+        System.out.println(frameWidth + " " + frameHeight);
 
         setSize(frameWidth, frameHeight);
 
