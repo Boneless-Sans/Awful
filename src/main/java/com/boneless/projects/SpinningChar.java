@@ -1,20 +1,22 @@
 package com.boneless.projects;
 
 public class SpinningChar{
+    @SuppressWarnings("BusyWait")
     public static void main(String[] args){
+        int delayTime = 100;
         while(true){
             try {
                 System.out.println("-");
-                Thread.sleep(100);
+                Thread.sleep(delayTime);
                 clearTerminal();
                 System.out.println("\\");
-                Thread.sleep(100);
+                Thread.sleep(delayTime);
                 clearTerminal();
                 System.out.println("|");
-                Thread.sleep(100);
+                Thread.sleep(delayTime);
                 clearTerminal();
                 System.out.println("/");
-                Thread.sleep(100);
+                Thread.sleep(delayTime);
                 clearTerminal();
             }catch (InterruptedException e){
                 throw new RuntimeException(e);
