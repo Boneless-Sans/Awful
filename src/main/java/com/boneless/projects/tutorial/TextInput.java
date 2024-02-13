@@ -1,4 +1,4 @@
-package com.boneless.projects;
+package com.boneless.projects.tutorial;
 
 import com.boneless.projects.utils.FileReaderSaver;
 
@@ -6,8 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileReader;
 
 public class TextInput extends JFrame implements ActionListener{
     JButton button;

@@ -1,11 +1,11 @@
-package com.boneless.projects;
+package com.boneless.projects.tutorial;
 
+import com.boneless.projects.GameRunner;
 import com.boneless.projects.utils.JsonFile;
 import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
 
 public class LoginScreen extends JFrame{
     public LoginScreen() {

@@ -1,7 +1,6 @@
-package com.boneless.projects;
+package com.boneless.projects.tutorial;
 
 import com.boneless.projects.utils.IconResize;
-import com.boneless.projects.utils.SystemUI;
 
 import javax.swing.*;
 import java.awt.*;
