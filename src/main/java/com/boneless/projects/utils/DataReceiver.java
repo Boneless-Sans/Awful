@@ -24,7 +24,7 @@ public class DataReceiver {
         }
 
         // Start the HTTP server on port 8080
-        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1",8080), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress("192.168.1.149",8080), 0);
         server.createContext("/receive", new MyHandler());
         server.setExecutor(null);
         server.start();
@@ -40,12 +40,13 @@ public class DataReceiver {
                 server.stop(0);
                 writeDataToFile();
                 System.out.println("Server stopped. Data written to file.");
+                System.exit(0);
                 break;
             } else if(input.equalsIgnoreCase("clear") || input.equalsIgnoreCase("cls")){
                 System.out.print("\033[H\033[2J");
                 System.out.flush();
             } else if(input.equalsIgnoreCase("ip")){
-                System.out.println("IP: ");
+                System.out.println("IP: " + server.getAddress());
             }
             else {
                 System.out.println("Unknown command. Type 'help' for a list of commands.");

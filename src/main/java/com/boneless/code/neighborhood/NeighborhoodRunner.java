@@ -7,7 +7,7 @@ import java.io.FileReader;
 
 public class NeighborhoodRunner {
     public static void main(String[] args){
-        PainterListener rob = new PainterListener();
-        rob.addPaintBucket(1,1,10);
+        RowPainter bob = new RowPainter(0,0,"east",40);
+        bob.paintArea("red", "orange");
     }
 }

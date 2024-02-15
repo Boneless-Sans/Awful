@@ -2,22 +2,17 @@ package com.boneless.projects;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.Random;
+import java.awt.event.*;
+import java.util.*;
 
 public class Snake extends JFrame implements KeyListener {
-    private boolean runGame = true;
+    private static boolean runGame = true;
     private final int boardSize = 10;
     private final int[][] board = new int[boardSize][boardSize];
     private JPanel[][] boardPanels;
-    private PSnake player;
-    private final HashMap<String, Integer> objectList = new HashMap<>();
+    private static PSnake player;
+    private Food food;
+    private static final HashMap<String, Integer> objectList = new HashMap<>();
     public static void main(String[] args){
         new Snake();
     }
@@ -32,9 +27,14 @@ public class Snake extends JFrame implements KeyListener {
     }
     private void init(){
         setSize(500,500);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        addComponentListener(checkResize());
+        addWindowListener(closeWindow());
+        if(Objects.equals(System.getProperty("os.name"), "Mac")){
+            addComponentListener(checkResize()); //DO NOT USE IN WINDOWS!! SHIT WILL BREAK. not sure about linux
+        }else{
+            System.out.println("Not running MacOS, Window will not resize!");
+            setResizable(false);
+        }
         addKeyListener(this);
         setTitle("Snake");
         setLayout(new GridLayout(boardSize,boardSize));
@@ -47,12 +47,16 @@ public class Snake extends JFrame implements KeyListener {
             }
         }
 
-        Random rand = new Random(); //spawn player
+        Random rand = new Random();
+        //spawn player
         int randSX = rand.nextInt(2,board.length - 2);
         int randSY = rand.nextInt(2,board[0].length - 2);
 
-        player = new PSnake(randSX, randSY, board);
+        player = new PSnake(randSX, randSY, board, boardPanels);
         board[randSX][randSY] = 1;
+
+        food = new Food(board);
+
     }
     @SuppressWarnings({"BusyWait", "CallToPrintStackTrace"})
     private void startSnakeMovement(){
@@ -106,11 +110,29 @@ public class Snake extends JFrame implements KeyListener {
             }
         };
     }
+    private WindowAdapter closeWindow(){
+        return new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.out.println("Exit");
+                System.exit(0);
+            }
+        };
+    }
     private void moveSnake(){
         try {
             player.move();
+            checkCollision(player.x, player.y);
         }catch (ArrayIndexOutOfBoundsException e) { //crashes game if player is out of bounds, could loop it, but that's lame
-            System.exit(0);
+            endGame();
+        }
+    }
+    private void checkCollision(int x, int y){
+        if(x == objectList.get("player") || y == objectList.get("player")){
+            System.out.println("hit player");
+        }
+        if(x == objectList.get("food") || y == objectList.get("food")){
+            System.out.println("hit food");
         }
     }
     @Override
@@ -119,14 +141,34 @@ public class Snake extends JFrame implements KeyListener {
     public void keyPressed(KeyEvent e) {
         char keyChar = e.getKeyChar();
         switch (keyChar){
-            case 'w' -> player.turn("north");
-            case 's' -> player.turn("south");
-            case 'a' -> player.turn("west");
-            case 'd' -> player.turn("east");
+            case 'w' -> {
+                if(!Objects.equals(player.getFacingDir(),"south")) {
+                    player.turn("north");
+                }
+            }
+            case 's' -> {
+                if(!Objects.equals(player.getFacingDir(),"north")) {
+                    player.turn("south");
+                }
+            }
+            case 'a' -> {
+                if(!Objects.equals(player.getFacingDir(),"east")) {
+                    player.turn("west");
+                }
+            }
+            case 'd' -> {
+                if(!Objects.equals(player.getFacingDir(),"west")) {
+                    player.turn("east");
+                }
+            }
         }
         if(keyChar == KeyEvent.VK_ESCAPE){
-            System.exit(0);
+            endGame();
         }
+    }
+    private static void endGame(){
+        runGame = false;
+        System.exit(0);
     }
     @Override
     public void keyReleased(KeyEvent e) {}
@@ -134,8 +176,10 @@ public class Snake extends JFrame implements KeyListener {
     private static class PSnake extends Entity{
         private String facingDir;
         private int bodyLength = 1;
-        public PSnake(int x, int y, int[][] board){
+        private JPanel[][] boardPanels;
+        public PSnake(int x, int y, int[][] board, JPanel[][] boardPanels){
             super(x,y,board);
+            this.boardPanels = boardPanels;
             Random rand = new Random();
             switch (rand.nextInt(0,4)){
                 case 0 -> facingDir = "north";
@@ -143,6 +187,8 @@ public class Snake extends JFrame implements KeyListener {
                 case 2 -> facingDir = "south";
                 case 3 -> facingDir = "west";
             }
+            JLabel head = new JLabel(new ImageIcon("src/main/resources/assets/images/painter.png"));
+            add(head);
         }
         private void move(){
             switch(facingDir){
@@ -165,12 +211,10 @@ public class Snake extends JFrame implements KeyListener {
             }
         }
         private void turn(String dir){
-            if(!Objects.equals(this.facingDir, dir)) {
-                facingDir = dir;
-                move();
-            }else{
-                facingDir = dir;
-            }
+            facingDir = dir;
+        }
+        public String getFacingDir(){
+            return facingDir;
         }
         @Override
         protected int getColor() {
@@ -190,6 +234,9 @@ public class Snake extends JFrame implements KeyListener {
         protected int x;
         protected int y;
         protected final int[][] board;
+        private Entity(int[][] board){
+            this.board = board;
+        }
         protected Entity(int x, int y, int[][] board){
             this.x = x;
             this.y = y;
@@ -200,8 +247,26 @@ public class Snake extends JFrame implements KeyListener {
         }
     }
     private static class Food extends Entity{
-        public Food(int x, int y, int[][] board){
-            super(x,y,board);
+        public Food(int[][] board){
+            super(board);
+
+            Random rand = new Random();
+            int randX = rand.nextInt(0,board.length);
+            int randY = rand.nextInt(0,board[0].length);
+
+            boolean spawnCheck = true;
+            while(spawnCheck) {
+                if (randX != player.x && randY != player.y) {
+                    x = randX;
+                    y = randY;
+
+                    board[randX][randY] = 2;
+                    spawnCheck = false;
+                } else {
+                    System.out.println("Food spawned on player! respawning...");
+                    spawnCheck = false;
+                }
+            }
         }
         @Override
         protected int getColor() {

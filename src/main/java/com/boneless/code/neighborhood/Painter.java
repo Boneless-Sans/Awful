@@ -69,6 +69,12 @@ public class Painter extends JFrame {
     public Painter(int xCord, int yCord, String facingDirection) {
         init(xCord, yCord, facingDirection);
     }
+
+    public Painter(int x, int y, String direction, int paint) {
+        paintCount = paint;
+        init(x, y,direction);
+    }
+
     private void init(int x, int y, String facingDirection) {
         initializeBoardSize();
         initializeTileImages();
