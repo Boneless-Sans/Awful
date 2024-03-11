@@ -29,7 +29,8 @@ public class Snake extends JFrame implements KeyListener {
         setSize(500,500);
         setLocationRelativeTo(null);
         addWindowListener(closeWindow());
-        if(Objects.equals(System.getProperty("os.name"), "Mac")){
+        //System.getProperties().list(System.out);
+        if(Objects.equals(System.getProperty("os.name"), "Mac OS X")){
             addComponentListener(checkResize()); //DO NOT USE IN WINDOWS!! SHIT WILL BREAK. not sure about linux
         }else{
             System.out.println("Not running MacOS, Window will not resize!");
@@ -195,18 +196,22 @@ public class Snake extends JFrame implements KeyListener {
                 case "north" -> {
                     board[x][y] = 0;
                     board[x--][y] = getColor();
+                    boardPanels[x][y] = new SnakeBody(x,y,board);
                 }
                 case "east" -> {
                     board[x][y] = 0;
                     board[x][y++] = getColor();
+                    boardPanels[x][y] = new SnakeBody(x,y,board);
                 }
                 case "south" -> {
                     board[x][y] = 0;
                     board[x++][y] = getColor();
+                    boardPanels[x][y] = new SnakeBody(x,y,board);
                 }
                 case "west" -> {
                     board[x][y] = 0;
                     board[x][y--] = getColor();
+                    boardPanels[x][y] = new SnakeBody(x,y,board);
                 }
             }
         }
