@@ -10,6 +10,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class JsonFile {
 
     private static final String DEFAULT_DIRECTORY = "/src/main/resources/data/";
@@ -46,6 +47,56 @@ public class JsonFile {
                 return "-1"; // Return a sentinel value for invalid mainKey
             }
 
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return "invalid key";
+    }
+    public static String readWithThreeKeys(String filename, String mainKey, String subKey, String valueKey) {
+        try (Reader reader = new FileReader("src/main/resources/data/" + filename)) {
+            JSONTokener tokener = new JSONTokener(reader);
+            JSONObject jsonObject = new JSONObject(tokener);
+
+            if (jsonObject.has(mainKey)) {
+                Object mainValue = jsonObject.get(mainKey);
+
+                if (mainValue instanceof JSONObject) {
+                    JSONObject subObject = (JSONObject) mainValue;
+
+                    if (subObject.has(subKey)) {
+                        Object valuesObject = subObject.get(subKey);
+
+                        if (valuesObject instanceof JSONObject) {
+                            JSONObject valueObject = (JSONObject) valuesObject;
+
+                            if (valueObject.has(valueKey)) {
+                                Object value = valueObject.get(valueKey);
+
+                                // Check the type of value and handle accordingly
+                                if (value instanceof String) {
+                                    return (String) value;
+                                } else if (value instanceof Number) {
+                                    return String.valueOf(value);
+                                } else {
+                                    return "invalid value type";
+                                }
+                            } else {
+                                return "invalid key";
+                            }
+                        } else {
+                            return "invalid subKey type";
+                        }
+                    } else {
+                        return "invalid subKey";
+                    }
+                } else {
+                    return "invalid mainKey type";
+                }
+            } else {
+                return "-1"; // Return a sentinel value for invalid mainKey
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
@@ -54,36 +105,48 @@ public class JsonFile {
 
         return "invalid key";
     }
-    public static String[] readArray(String filename, String mainKey) {
+    public static String readWithFourKeys(String filename, String mainKey, String subKey, String blockKey, String valueKey) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
             JSONTokener tokener = new JSONTokener(reader);
             JSONObject jsonObject = new JSONObject(tokener);
 
             if (jsonObject.has(mainKey)) {
-                Object mainValue = jsonObject.get(mainKey);
+                JSONObject mainObject = jsonObject.getJSONObject(mainKey);
 
-                if (mainValue instanceof JSONArray) {
-                    JSONArray arrayValue = (JSONArray) mainValue;
-                    int length = arrayValue.length();
-                    String[] resultArray = new String[length];
+                if (mainObject.has(subKey)) {
+                    JSONObject subObject = mainObject.getJSONObject(subKey);
 
-                    for (int i = 0; i < length; i++) {
-                        resultArray[i] = arrayValue.getString(i);
+                    if (subObject.has(blockKey)) {
+                        JSONObject blockObject = subObject.getJSONObject(blockKey);
+
+                        if (blockObject.has(valueKey)) {
+                            Object value = blockObject.get(valueKey);
+
+                            if (value instanceof String) {
+                                return (String) value;
+                            } else {
+                                return "invalid value type";
+                            }
+                        } else {
+                            return "invalid valueKey";
+                        }
+                    } else {
+                        return "invalid blockKey";
                     }
-
-                    return resultArray;
                 } else {
-                    System.out.println("Invalid array type");
+                    return "invalid subKey";
                 }
             } else {
-                System.out.println("Invalid mainKey");
+                return "-1"; // Return a sentinel value for invalid mainKey
             }
 
-        } catch (IOException | JSONException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return "invalid key";
     }
     public static String[][] read2DArray(String filename, String mainKey) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
@@ -123,7 +186,7 @@ public class JsonFile {
 
         return null;
     }
-    public static String[] readTwoKeysArray(String filename, String firstKey, String secondKey) {
+    public static String readTwoKeys(String filename, String firstKey, String secondKey) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
             JSONTokener tokener = new JSONTokener(reader);
             JSONObject jsonObject = new JSONObject(tokener);
@@ -137,18 +200,11 @@ public class JsonFile {
                     if (nestedObject.has(secondKey)) {
                         Object secondValue = nestedObject.get(secondKey);
 
-                        if (secondValue instanceof JSONArray) {
-                            JSONArray arrayValue = (JSONArray) secondValue;
-                            int length = arrayValue.length();
-                            String[] resultArray = new String[length];
-
-                            for (int i = 0; i < length; i++) {
-                                resultArray[i] = arrayValue.getString(i);
-                            }
-
-                            return resultArray;
+                        if (secondValue instanceof String) {
+                            // Return the single string value
+                            return (String) secondValue;
                         } else {
-                            System.out.println("Invalid array type for secondKey");
+                            System.out.println("Invalid value type for secondKey");
                         }
                     } else {
                         System.out.println("Invalid secondKey");
@@ -168,6 +224,7 @@ public class JsonFile {
 
         return null;
     }
+
 
     public static Color[] readColorArray(String filename, String mainKey) {
         try (Reader reader = new FileReader(getFilePath(filename))) {
@@ -306,23 +363,88 @@ public class JsonFile {
             e.printStackTrace();
         }
     }
+    public static void write3ln(String filename, String mainKey, String subKey, String subSubKey, String data) {
+        try {
+            JSONObject jsonObject = readJsonObject(filename);
 
-//    private static String getFilePath(String filename) {
+            if (jsonObject == null) {
+                jsonObject = new JSONObject();
+            }
+
+            // Get or create nested objects
+            JSONObject mainKeyObject = jsonObject.optJSONObject(mainKey);
+            if (mainKeyObject == null) {
+                mainKeyObject = new JSONObject();
+                jsonObject.put(mainKey, mainKeyObject);
+            }
+
+            JSONObject subKeyObject = mainKeyObject.optJSONObject(subKey);
+            if (subKeyObject == null) {
+                subKeyObject = new JSONObject();
+                mainKeyObject.put(subKey, subKeyObject);
+            }
+
+            JSONObject subSubKeyObject = subKeyObject.optJSONObject(subSubKey);
+            if (subSubKeyObject == null) {
+                subSubKeyObject = new JSONObject();
+                subKeyObject.put(subSubKey, subSubKeyObject);
+            }
+
+            // Set the data
+            subSubKeyObject.put("data", data);
+
+            try (Writer writer = new FileWriter("\\" + getFilePath(filename))) {
+                writer.write(jsonObject.toString(2));
+            }
+
+        } catch (IOException e) {
+            System.out.println("File Not Found: " + getFilePath(filename));
+        }
+    }
+
+
+
+    //        private static String getFilePath(String filename) {
 //        String directory = System.getProperty("user.dir") + DEFAULT_DIRECTORY;
 //        return directory + filename;
-//    }
+//        }
     private static String getFilePath(String filename) {
         Path currentDir = Paths.get("");
         String directory = currentDir.toAbsolutePath() + DEFAULT_DIRECTORY;
         return directory + filename;
     }
     private static JSONObject readJsonObject(String filename) {
-        try (Reader reader = new FileReader(getFilePath(filename))) {
+        try (Reader reader = new FileReader("\\" + getFilePath(filename))) {
             JSONTokener tokener = new JSONTokener(reader);
             return new JSONObject(tokener);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("File Not Found: " + getFilePath(filename));
+            //System.out.println(String.valueOf(e.printStackTrace()));
         }
         return null;
+    }
+    public static int countBlocks(String mapName, String objectKey, String blockKey) {
+        try (Reader reader = new FileReader(getFilePath(mapName))) {
+            JSONTokener tokener = new JSONTokener(reader);
+            JSONObject jsonObject = new JSONObject(tokener);
+
+            if (jsonObject.has(objectKey)) {
+                JSONObject object = jsonObject.getJSONObject(objectKey);
+
+                if (object.has(blockKey)) {
+                    JSONObject blocks = object.getJSONObject(blockKey);
+                    return blocks.length(); // This returns the number of keys in the blocks object
+                } else {
+                    System.out.println("No '" + blockKey + "' object found under '" + objectKey + "'.");
+                }
+            } else {
+                System.out.println("No '" + objectKey + "' object found in the map JSON.");
+            }
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 }
