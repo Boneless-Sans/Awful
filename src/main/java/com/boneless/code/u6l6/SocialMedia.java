@@ -38,13 +38,8 @@ public class SocialMedia {
          * -----------------------------------------------------------------------------
          */
         //go through each array list obj, compare and edit accordingly
-        int currentIndex = 0;
-        int lastCompare = 0;
-        ArrayList<String> uh = new ArrayList<>();
-        for (String friend : friends) {
-            if (friends.get(currentIndex).compareTo(friend) < lastCompare) {
-                
-            }
+        for(int i = 0; i < friends.size() -1;i++){
+
         }
     }
 

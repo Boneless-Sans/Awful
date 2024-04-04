@@ -1,6 +1,9 @@
 package com.boneless.code.u6l6;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+
 public class SocialMediaRunner {
     public static void main(String[] args) {
 
@@ -25,6 +28,8 @@ public class SocialMediaRunner {
          */
         app.sortUsers();
         System.out.println("this one -> " + app);
+        //String[] test = "1";
+        //System.out.println(Arrays.toString(test));
 
 
 
